@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Giỏ hàng | Bean & Leaf{% endblock %}
+{% block content %}
+<section class="container cart-page page-enter">
+  <div class="page-heading"><p class="eyebrow">Bean &amp; Leaf</p><h1>Giỏ hàng của bạn</h1></div>
+  {% if items %}
+    <div class="cart-layout">
+      <div class="cart-list">
+        {% for item in items %}
+          <article class="cart-item card-enter">
+            <div class="cart-thumb">{% if item.product.image %}<img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">{% else %}<span>☕</span>{% endif %}</div>
+            <div class="cart-item-info"><p class="eyebrow">{{ item.product.category.name }}</p><h2><a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a></h2><strong>{{ item.product.price|stringformat:'d' }}đ</strong></div>
+            <form class="qty-form" method="post" action="{% url 'cart:update' item.product.id %}">
+              {% csrf_token %}
+              <input aria-label="Số lượng {{ item.product.name }}" type="number" name="quantity" min="0" value="{{ item.quantity }}">
+              <button type="submit">Cập nhật</button>
+            </form>
+            <strong class="cart-subtotal">{{ item.subtotal|stringformat:'d' }}đ</strong>
+          </article>
+        {% endfor %}
+      </div>
+      <aside class="order-summary card-enter">
+        <h2>Tóm tắt đơn hàng</h2>
+        <div><span>Tạm tính</span><strong>{{ subtotal|stringformat:'d' }}đ</strong></div>
+        <div><span>Vận chuyển</span>{% if shipping %}<strong>{{ shipping|stringformat:'d' }}đ</strong>{% else %}<span class="free-ship">Miễn phí</span>{% endif %}</div>
+        {% if voucher %}<div class="applied-voucher"><span>🎟 {{ voucher.code }}</span><form method="post" action="{% url 'cart:remove-voucher' %}">{% csrf_token %}<button type="submit">Gỡ</button></form></div>{% endif %}
+        <hr>
+        <div class="total"><span>Tổng cộng</span><strong>{{ total|stringformat:'d' }}đ</strong></div>
+        {% if available_voucher and not voucher %}
+          <form class="voucher-form" method="post" action="{% url 'cart:apply-voucher' %}">{% csrf_token %}<input type="hidden" name="code" value="{{ available_voucher.code }}"><p><strong>Quà đăng ký mới!</strong><br>Voucher <code>{{ available_voucher.code }}</code> miễn phí vận chuyển.</p><button class="voucher-button" type="submit">Dùng voucher</button></form>
+        {% elif not user.is_authenticated %}
+          <div class="voucher-guest"><strong>Đăng ký nhận voucher freeship</strong><p>Tạo tài khoản để nhận ngay voucher miễn phí vận chuyển.</p><a href="{% url 'accounts:signup' %}">Đăng ký ngay →</a></div>
+        {% endif %}
+        <a class="button full" href="{% url 'checkout' %}">Tiến hành thanh toán</a>
+      </aside>
+    </div>
+  {% else %}
+    <div class="empty-state"><div class="empty-icon">☕</div><h2>Giỏ hàng đang trống</h2><p>Khám phá những hạt cà phê thơm ngon dành cho bạn.</p><a class="button" href="{% url 'products:list' %}">Khám phá sản phẩm</a></div>
+  {% endif %}
+</section>
+{% endblock %}
