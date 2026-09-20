@@ -1,1 +1,98 @@
-{% extends 'base.html' %}{% load static %}{% block title %}{{ product.name }} | Bean & Leaf{% endblock %}{% block content %}<section class="detail-page container"><a class="back-link" href="{% url 'products:list' %}">← Quay lại cửa hàng</a><div class="detail-grid"><div class="detail-image">{% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% else %}<img src="{% static 'images/coffee-hero.png' %}" alt="{{ product.name }}">{% endif %}</div><div class="detail-info"><p class="eyebrow">{{ product.category.name }} · {{ product.get_roast_level_display }}</p><h1>{{ product.name }}</h1><p class="detail-price">{{ product.price|stringformat:'d' }}đ</p><p class="detail-description">{{ product.description }}</p><dl><div><dt>Xuất xứ</dt><dd>{{ product.origin|default:'Việt Nam' }}</dd></div><div><dt>Tình trạng</dt><dd>{% if product.stock %}Còn {{ product.stock }} sản phẩm{% else %}Tạm hết hàng{% endif %}</dd></div></dl>{% if product.stock %}<form class="add-form" method="post" action="{% url 'cart:add' product.id %}">{% csrf_token %}<input type="hidden" name="next" value="{% url 'products:detail' product.slug %}"><label>Số lượng <input type="number" name="quantity" min="1" max="{{ product.stock }}" value="1"></label><button class="button">Thêm vào giỏ hàng</button></form>{% endif %}</div></div>{% if related %}<div class="section related"><div class="section-heading"><h2>Có thể bạn sẽ thích</h2></div><div class="catalog-grid">{% for product in related %}{% include 'partials/product_card.html' %}{% endfor %}</div></div>{% endif %}</section>{% endblock %}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+	{{ product.name }} | Bean & Leaf
+{% endblock %}
+
+{% block content %}
+	<section class="detail-page container">
+		<a class="back-link" href="{% url 'products:list' %}">
+			← Quay lại cửa hàng
+		</a>
+
+		<div class="detail-grid">
+			<div class="detail-image">
+				{% if product.image %}
+					<img src="{{ product.image.url }}" alt="{{ product.name }}">
+				{% else %}
+					<img src="{% static 'images/coffee-hero.png' %}" alt="{{ product.name }}">
+				{% endif %}
+			</div>
+
+			<div class="detail-info">
+				<p class="eyebrow">
+					{{ product.category.name }} · {{ product.get_roast_level_display }}
+				</p>
+				<h1>{{ product.name }}</h1>
+				<p class="detail-price">{{ product.price|stringformat:'d' }}đ</p>
+				<p class="detail-description">{{ product.description }}</p>
+
+				<dl>
+					<div>
+						<dt>Xuất xứ</dt>
+						<dd>{{ product.origin|default:'Việt Nam' }}</dd>
+					</div>
+					<div>
+						<dt>Tình trạng</dt>
+						<dd>
+							{% if product.stock %}
+								Còn {{ product.stock }} sản phẩm
+							{% else %}
+								Tạm hết hàng
+							{% endif %}
+						</dd>
+					</div>
+				</dl>
+
+				{% if product.stock %}
+					<form class="add-form" method="post" action="{% url 'cart:add' product.id %}">
+						{% csrf_token %}
+						<label>
+							Số lượng
+							<input
+								type="number"
+								name="quantity"
+								min="1"
+								max="{{ product.stock }}"
+								value="1"
+							>
+						</label>
+
+						<div class="product-actions">
+							<button
+								class="button"
+								type="submit"
+								name="next"
+								value="{% url 'products:detail' product.slug %}"
+							>
+								Thêm vào giỏ hàng
+							</button>
+							<button
+								class="button buy-now"
+								type="submit"
+								name="next"
+								value="{% url 'checkout' %}"
+							>
+								Mua Ngay và Lun!
+							</button>
+						</div>
+					</form>
+				{% endif %}
+			</div>
+		</div>
+
+		{% if related %}
+			<div class="section related">
+				<div class="section-heading">
+					<h2>Có thể bạn sẽ thích</h2>
+				</div>
+				<div class="catalog-grid">
+					{% for product in related %}
+						{% include 'partials/product_card.html' %}
+					{% endfor %}
+				</div>
+			</div>
+		{% endif %}
+	</section>
+{% endblock %}
