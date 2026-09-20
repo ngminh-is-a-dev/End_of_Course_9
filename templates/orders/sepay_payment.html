@@ -1,5 +1,27 @@
 {% extends 'base.html' %}
 {% block title %}Thanh toán SePay | Bean & Leaf{% endblock %}
 {% block content %}
-<section class="container sepay-page page-enter"><div class="sepay-card card-enter"><p class="eyebrow">SePay sandbox payment</p><h1>Thanh toán đơn {{ order.code }}</h1><p class="sepay-note">SePay sẽ tạo trang thanh toán có QR chuyển khoản với số tiền và nội dung đơn hàng tự động. Nhấn tiếp tục để mở trang thanh toán an toàn.</p><div class="sepay-amount">{{ order.total|stringformat:'d' }}đ</div><dl class="bank-details"><div><dt>Mã đơn / nội dung chuyển khoản</dt><dd><code>{{ order.code }}</code></dd></div><div><dt>Phương thức</dt><dd>QR chuyển khoản ngân hàng</dd></div></dl><form id="sepay-checkout-form" action="{{ gateway_url }}" method="post">{% for name, value in gateway_fields.items %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}<button class="button full" type="submit">Tiếp tục tới SePay</button></form><p class="payment-waiting">Đơn sẽ tự chuyển trạng thái khi SePay gửi IPN xác nhận.</p></div></section>
+<section class="container sepay-page page-enter">
+    <div class="sepay-card card-enter">
+        <p class="eyebrow">SePay sandbox payment</p>
+        <h1>Thanh toán đơn {{ order.code }}</h1>
+        <p class="sepay-note">SePay sẽ tạo trang thanh toán có QR chuyển khoản với số tiền và nội dung đơn hàng tự động.
+            Nhấn tiếp tục để mở trang thanh toán an toàn.</p>
+        <div class="sepay-amount">{{ order.total|stringformat:'d' }}đ</div>
+        <dl class="bank-details">
+            <div>
+                <dt>Mã đơn / nội dung chuyển khoản</dt>
+                <dd><code>{{ order.code }}</code></dd>
+            </div>
+            <div>
+                <dt>Phương thức</dt>
+                <dd>QR chuyển khoản ngân hàng</dd>
+            </div>
+        </dl>
+        <form id="sepay-checkout-form" action="{{ gateway_url }}" method="post">{% for name, value in
+            gateway_fields.items %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}<button
+                class="button full" type="submit">Tiếp tục tới SePay</button></form>
+        <p class="payment-waiting">Đơn sẽ tự chuyển trạng thái khi SePay gửi IPN xác nhận.</p>
+    </div>
+</section>
 {% endblock %}
