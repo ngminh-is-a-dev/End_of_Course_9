@@ -1,2 +1,16 @@
 {% load static %}
-<article class="product-card"><a class="product-image" href="{{ product.get_absolute_url }}">{% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% else %}<img src="{% static 'images/coffee-hero.png' %}" alt="{{ product.name }}">{% endif %}<span class="pill">{{ product.get_roast_level_display }}</span></a><div class="product-body"><p class="eyebrow">{{ product.category.name }}</p><h3><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h3><p class="product-origin">{{ product.origin|default:'Hương vị cân bằng' }}</p><div class="product-bottom"><strong>{{ product.price|stringformat:'d' }}đ</strong><form method="post" action="{% url 'cart:add' product.id %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button aria-label="Thêm {{ product.name }}" class="add-button">+</button></form></div></div></article>
+<article class="product-card"><a class="product-image" href="{{ product.get_absolute_url }}">{% if product.image %}<img
+            src="{{ product.image.url }}" alt="{{ product.name }}">{% else %}<img
+            src="{% static 'images/coffee-hero.png' %}" alt="{{ product.name }}">{% endif %}<span class="pill">{{
+            product.get_roast_level_display }}</span></a>
+    <div class="product-body">
+        <p class="eyebrow">{{ product.category.name }}</p>
+        <h3><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h3>
+        <p class="product-origin">{{ product.origin|default:'Hương vị cân bằng' }}</p>
+        <div class="product-bottom"><strong>{{ product.price|stringformat:'d' }}đ</strong>
+            <form method="post" action="{% url 'cart:add' product.id %}">{% csrf_token %}<input type="hidden"
+                    name="next" value="{{ request.get_full_path }}"><button aria-label="Thêm {{ product.name }}"
+                    class="add-button">+</button></form>
+        </div>
+    </div>
+</article>
