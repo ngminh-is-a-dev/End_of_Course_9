@@ -35,4 +35,20 @@ class SePayPaymentTests(TestCase):
         self.order.refresh_from_db()
         self.assertEqual(self.order.payment_status, Order.PAID)
 
+    @override_settings(SEPAY_GATEWAY_SECRET_KEY='demo-secret')
+    def test_ipn_ignores_invalid_amount_without_crashing(self):
+        payload = {
+            'notification_type': 'ORDER_PAID',
+            'order': {'order_invoice_number': self.order.code},
+            'transaction': {'transaction_id': 'FT-invalid', 'transaction_amount': 'not-a-number'},
+        }
+
+        response = self.client.post(
+            reverse('sepay-webhook'), data=json.dumps(payload), content_type='application/json', HTTP_X_SECRET_KEY='demo-secret'
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.payment_status, Order.PENDING)
+
 # Create your tests here.

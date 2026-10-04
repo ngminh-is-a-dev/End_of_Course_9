@@ -1,10 +1,18 @@
 import hashlib
 import hmac
 import base64
+from decimal import Decimal, InvalidOperation
 from urllib.parse import urlencode
 from django.conf import settings
 from django.utils import timezone
 from .models import Order, OrderItem
+
+
+def _is_sufficient_amount(value, minimum):
+    try:
+        return Decimal(str(value)) >= Decimal(minimum)
+    except (InvalidOperation, TypeError, ValueError):
+        return False
 
 
 def create_order(*, user, summary, data):
@@ -84,10 +92,11 @@ def mark_order_paid(payload):
         order_data = payload.get('order', {})
         transaction = payload.get('transaction', {})
         code = str(order_data.get('order_invoice_number', '')).upper()
-        amount = int(float(transaction.get('transaction_amount', 0)))
         transaction_id = str(transaction.get('transaction_id') or transaction.get('id') or '')
-        order = Order.objects.filter(code=code, payment_status=Order.PENDING).first()
-        if not order or amount < order.total:
+        order = Order.objects.filter(code=code, payment_method=Order.SEPAY, payment_status=Order.PENDING).first()
+        if not order or not _is_sufficient_amount(transaction.get('transaction_amount', 0), order.total):
+            return None
+        if transaction_id and Order.objects.filter(transaction_id=transaction_id).exists():
             return None
         order.payment_status = Order.PAID
         order.transaction_id = transaction_id or None
@@ -99,12 +108,14 @@ def mark_order_paid(payload):
         return order
     code = str(payload.get('code', '')).upper()
     content = str(payload.get('content', '')).upper()
-    order = Order.objects.filter(code=code, payment_status=Order.PENDING).first()
+    order = Order.objects.filter(code=code, payment_method=Order.SEPAY, payment_status=Order.PENDING).first()
     if not order:
-        order = next((item for item in Order.objects.filter(payment_status=Order.PENDING) if item.code in content), None)
-    if not order or payload.get('transferType') != 'in' or int(payload.get('transferAmount', 0)) < order.total:
+        order = next((item for item in Order.objects.filter(payment_method=Order.SEPAY, payment_status=Order.PENDING) if item.code in content), None)
+    if not order or payload.get('transferType') != 'in' or not _is_sufficient_amount(payload.get('transferAmount', 0), order.total):
         return None
     transaction_id = str(payload.get('referenceCode') or payload.get('id') or '')
+    if transaction_id and Order.objects.filter(transaction_id=transaction_id).exists():
+        return None
     order.payment_status = Order.PAID
     order.transaction_id = transaction_id or None
     order.paid_at = timezone.now()

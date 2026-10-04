@@ -17,10 +17,18 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
-from products.views import home
+from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home, name='home'),
+    path('products/', include('products.urls')),
+    path('cart/', include('cart.urls')),
+    path('accounts/', include('accounts.urls')),
+    path('checkout/', include('orders.urls')),
+    path('api/', include('products.api_urls')),
+    # Keep the catch-all content-page route last so it cannot shadow app URLs.
+    path('', include('core.urls')),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

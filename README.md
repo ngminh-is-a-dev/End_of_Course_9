@@ -5,11 +5,16 @@ Website thương mại điện tử cà phê viết bằng Django. Dự án có 
 ## Chạy local
 
 ```powershell
-py -3 -m pip install -r requirements.txt
-py -3 manage.py migrate
-py -3 manage.py seed_catalog
-py -3 manage.py runserver
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python manage.py migrate
+python manage.py seed_catalog
+python manage.py runserver
 ```
+
+Nếu PowerShell chặn script kích hoạt, chạy `Set-ExecutionPolicy -Scope Process Bypass` trong cửa sổ hiện tại, rồi kích hoạt lại. Có thể dùng trực tiếp `.\.venv\Scripts\python.exe manage.py <lệnh>` mà không cần kích hoạt môi trường.
 
 Mở `http://127.0.0.1:8000/`. Tạo tài khoản quản trị bằng `py -3 manage.py createsuperuser`, sau đó truy cập `/admin/`.
 
@@ -40,8 +45,8 @@ Merchant ID và Secret Key test đã nằm trong `.env` cục bộ, không đư�
 ## Kiểm tra chất lượng
 
 ```powershell
-py -3 manage.py check
-py -3 manage.py test
+.\.venv\Scripts\python.exe manage.py check
+.\.venv\Scripts\python.exe manage.py test
 ```
 
 Xem [TECH_REPORT.md](docs/TECH_REPORT.md) cho kiến trúc/kỹ thuật và [DEMO.md](docs/DEMO.md) cho kịch bản trình diễn.

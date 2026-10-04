@@ -25,4 +25,16 @@ class SessionCartTests(TestCase):
         self.assertContains(response, 'Miễn phí')
         self.assertContains(response, voucher.code)
 
+    def test_cart_redirect_stays_on_this_site_and_caps_quantity_at_stock(self):
+        self.product.stock = 2
+        self.product.save(update_fields=['stock'])
+
+        response = self.client.post(
+            reverse('cart:add', args=[self.product.id]),
+            {'quantity': 99, 'next': 'https://example.invalid/'},
+        )
+
+        self.assertRedirects(response, reverse('cart:detail'))
+        self.assertEqual(self.client.session['bean_leaf_cart'][str(self.product.id)], 2)
+
 # Create your tests here.
