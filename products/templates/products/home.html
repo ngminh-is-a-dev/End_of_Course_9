@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cửa hàng</title>
+</head>
+<body>
+    <header>
+        <a href="/">Cửa hàng</a>
+        <a href="/admin/">Quản trị</a>
+    </header>
+    <main>
+        <p>Danh mục sản phẩm</p>
+        <h1>Sản phẩm của chúng tôi</h1>
+        <p>Khám phá những sản phẩm đang được mở bán.</p>
+        {% if products %}
+            <section aria-label="Danh sách sản phẩm">
+                {% for product in products %}
+                    <article>
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                        {% else %}
+                            <p>Chưa có hình ảnh</p>
+                        {% endif %}
+                        <div>
+                            <p>{{ product.category.name }}</p>
+                            <h2>{{ product.name }}</h2>
+                            <p>{{ product.price }} ₫</p>
+                        </div>
+                    </article>
+                {% endfor %}
+            </section>
+        {% else %}
+            <p>Hiện chưa có sản phẩm nào được mở bán.</p>
+        {% endif %}
+    </main>
+</body>
+</html>
