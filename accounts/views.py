@@ -1,6 +1,7 @@
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import get_user_model, login
 from django.contrib.auth.views import LoginView, LogoutView
+from django.db import IntegrityError, transaction
 from django.shortcuts import redirect, render
 from .forms import LoginForm, SignupForm
 
@@ -10,10 +11,19 @@ def signup(request):
         return redirect('home')
     form = SignupForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
-        user = form.save()
-        login(request, user)
-        messages.success(request, 'Chào mừng bạn! Voucher miễn phí vận chuyển đã nằm trong tài khoản.')
-        return redirect('cart:detail')
+        try:
+            with transaction.atomic():
+                user = form.save()
+        except IntegrityError:
+            user_model = get_user_model()
+            if user_model.objects.filter(username=form.cleaned_data['username']).exists():
+                form.add_error('username', 'Tên đăng nhập này đã được sử dụng.')
+            else:
+                raise
+        else:
+            login(request, user)
+            messages.success(request, 'Chào mừng bạn! Voucher miễn phí vận chuyển đã nằm trong tài khoản.')
+            return redirect('cart:detail')
     return render(request, 'accounts/signup.html', {'form': form})
 
 
