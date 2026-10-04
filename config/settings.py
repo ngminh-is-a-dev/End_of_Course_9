@@ -11,9 +11,12 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -25,7 +28,7 @@ SECRET_KEY = 'django-insecure-#3wo!8-dos4#72gf4@dub#l1yt6y+n5b887y$1(f(g8rr6s6fm
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver', 'end-of-course-9.vercel.app']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']
 
 
 # Application definition
@@ -37,9 +40,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts.apps.AccountsConfig',
+    'rest_framework',
+    'core',
     'products',
+    'cart',
     'orders',
+    'accounts.apps.AccountsConfig',
+    'promotions',
 ]
 
 MIDDLEWARE = [
@@ -64,6 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.cart',
             ],
         },
     },
@@ -118,8 +126,22 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/accounts/login/'
+
+# SePay / VietQR configuration — supply these via environment variables in production.
+SEPAY_BANK_CODE = os.getenv('SEPAY_BANK_CODE', '')
+SEPAY_ACCOUNT_NUMBER = os.getenv('SEPAY_ACCOUNT_NUMBER', '')
+SEPAY_ACCOUNT_NAME = os.getenv('SEPAY_ACCOUNT_NAME', '')
+SEPAY_WEBHOOK_SECRET = os.getenv('SEPAY_WEBHOOK_SECRET', '')
+SEPAY_WEBHOOK_API_KEY = os.getenv('SEPAY_WEBHOOK_API_KEY', '')
+SEPAY_GATEWAY_MERCHANT_ID = os.getenv('SEPAY_GATEWAY_MERCHANT_ID', '')
+SEPAY_GATEWAY_SECRET_KEY = os.getenv('SEPAY_GATEWAY_SECRET_KEY', '')
+SEPAY_GATEWAY_ENV = os.getenv('SEPAY_GATEWAY_ENV', 'sandbox')
+SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000').rstrip('/')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
