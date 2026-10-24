@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Hồ sơ của tôi | Bean & Leaf{% endblock %}
+{% block content %}
+<section class="profile-page container">
+  <header class="page-heading"><p class="eyebrow">Tài khoản của bạn</p><h1>Hồ sơ</h1></header>
+  <div class="profile-grid">
+    <section class="profile-card profile-identity">
+      <img class="profile-avatar" src="{% if profile.avatar %}{{ profile.avatar.url }}{% else %}{% static 'images/avatar-placeholder.svg' %}{% endif %}" alt="Ảnh đại diện của {{ display_name }}">
+      <div><p class="eyebrow">Xin chào</p><h2>{{ display_name }}</h2><p class="profile-muted">{{ user.email|default:'Thành viên Bean & Leaf' }}</p></div>
+      <form class="profile-avatar-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}<label for="id_avatar">{{ form.avatar.label }}</label>{{ form.avatar }}
+        {% for error in form.avatar.errors %}<small class="form-error">{{ error }}</small>{% endfor %}
+        <button class="button" type="submit">Cập nhật ảnh</button>
+      </form>
+    </section>
+
+    <section class="profile-card">
+      <div class="profile-section-heading"><div><p class="eyebrow">Tài khoản</p><h2>Lịch sử đăng nhập</h2></div><span class="profile-count">{{ login_history|length }} gần đây</span></div>
+      {% if login_history %}
+        <div class="profile-table-wrap"><table class="profile-table"><thead><tr><th>Địa chỉ IP</th><th>Thời gian</th></tr></thead><tbody>
+          {% for entry in login_history %}<tr><td>{{ entry.ip_address|default:'Không ghi nhận' }}</td><td>{{ entry.created_at|date:'d/m/Y H:i' }}</td></tr>{% endfor %}
+        </tbody></table></div>
+      {% else %}<p class="profile-empty">Chưa có lịch sử đăng nhập.</p>{% endif %}
+    </section>
+
+    <section class="profile-card profile-orders">
+      <div class="profile-section-heading"><div><p class="eyebrow">Bean & Leaf</p><h2>Đơn hàng của tôi</h2></div><span class="profile-count">{{ orders|length }} đơn</span></div>
+      {% if orders %}
+        <div class="profile-order-list">
+          {% for order in orders %}
+            <article class="profile-order">
+              <div class="profile-order-heading"><div><p class="eyebrow">Mã đơn</p><strong>{{ order.code }}</strong></div><span class="delivery-status status-{{ order.delivery_status }}">{{ order.get_delivery_status_display }}</span></div>
+              <div class="profile-order-meta"><span>{{ order.created_at|date:'d/m/Y H:i' }}</span><strong>{{ order.total|floatformat:0 }}₫</strong></div>
+              <ul class="profile-order-items">{% for item in order.items.all %}<li>{{ item.product_name }} <span>× {{ item.quantity }}</span></li>{% endfor %}</ul>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}<div class="profile-empty"><p>Bạn chưa có đơn hàng nào.</p><a class="button outline" href="{% url 'products:list' %}">Khám phá menu</a></div>{% endif %}
+    </section>
+  </div>
+</section>
+{% endblock %}
