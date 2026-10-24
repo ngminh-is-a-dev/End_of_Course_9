@@ -10,8 +10,9 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('code', 'customer_name', 'total', 'payment_method', 'payment_status', 'created_at')
-    list_filter = ('payment_method', 'payment_status')
+    list_display = ('code', 'customer_name', 'total', 'payment_method', 'payment_status', 'delivery_status', 'created_at')
+    list_editable = ('delivery_status',)
+    list_filter = ('payment_method', 'payment_status', 'delivery_status')
     search_fields = ('code', 'customer_name', 'email', 'phone', 'transaction_id')
     readonly_fields = ('code', 'subtotal', 'shipping_fee', 'total', 'transaction_id', 'paid_at', 'created_at')
     inlines = [OrderItemInline]

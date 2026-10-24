@@ -1,16 +1,7 @@
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
-from django.utils.http import url_has_allowed_host_and_scheme
 from products.models import Product
 from .services import VOUCHER_SESSION_KEY, add_product, cart_summary, set_quantity
-
-
-def _quantity_from_request(request, default=1):
-    try:
-        return int(request.POST.get('quantity', default))
-    except (TypeError, ValueError):
-        return default
 
 def cart_detail(request):
     return render(request, 'cart/detail.html', cart_summary(request.user, request.session))
@@ -18,21 +9,12 @@ def cart_detail(request):
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, pk=product_id, is_active=True)
     if request.method == 'POST':
-        if product.stock <= 0:
-            messages.error(request, f'{product.name} hiện đã hết hàng.')
-            return redirect('products:detail', slug=product.slug)
-        quantity = _quantity_from_request(request)
-        add_product(request.session, product.id, quantity, product.stock)
+        add_product(request.session, product.id, max(1, int(request.POST.get('quantity', 1))))
         messages.success(request, f'Đã thêm {product.name} vào giỏ hàng.')
-    next_url = request.POST.get('next', '')
-    if not url_has_allowed_host_and_scheme(next_url, {request.get_host()}, request.is_secure()):
-        next_url = reverse('cart:detail')
-    return redirect(next_url)
+    return redirect(request.POST.get('next', 'cart:detail'))
 
 def update_cart(request, product_id):
-    if request.method == 'POST':
-        product = get_object_or_404(Product, pk=product_id, is_active=True)
-        set_quantity(request.session, product_id, _quantity_from_request(request, 0), product.stock)
+    if request.method == 'POST': set_quantity(request.session, product_id, max(0, int(request.POST.get('quantity', 0))))
     return redirect('cart:detail')
 
 

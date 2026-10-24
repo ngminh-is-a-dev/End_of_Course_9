@@ -22,11 +22,10 @@ from django.urls import include, path
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('products/', include('products.urls')),
-    path('cart/', include('cart.urls')),
-    path('accounts/', include('accounts.urls')),
-    path('checkout/', include('orders.urls')),
     path('api/', include('products.api_urls')),
-    # Keep the catch-all content-page route last so it cannot shadow app URLs.
+    path('cart/', include('cart.urls')),
+    path('checkout/', include('orders.urls')),
+    path('accounts/', include('accounts.urls')),
     path('', include('core.urls')),
 ]
 

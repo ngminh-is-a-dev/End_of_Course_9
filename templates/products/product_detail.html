@@ -1,1 +1,109 @@
-{% extends 'base.html' %}{% load static %}{% block title %}{{ product.name }} | Bean & Leaf{% endblock %}{% block content %}<section class="detail-page container"><a class="back-link" href="{% url 'products:list' %}">← Quay lại cửa hàng</a><div class="detail-grid"><div class="detail-image">{% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% else %}<img src="{% static 'images/coffee-hero.png' %}" alt="{{ product.name }}">{% endif %}</div><div class="detail-info"><p class="eyebrow">{{ product.category.name }} · {{ product.get_roast_level_display }}</p><h1>{{ product.name }}</h1><p class="detail-price">{{ product.price|stringformat:'d' }}đ</p><p class="detail-description">{{ product.description }}</p><dl><div><dt>Xuất xứ</dt><dd>{{ product.origin|default:'Việt Nam' }}</dd></div><div><dt>Tình trạng</dt><dd>{% if product.stock %}Còn {{ product.stock }} sản phẩm{% else %}Tạm hết hàng{% endif %}</dd></div></dl>{% if product.stock %}<form class="add-form" method="post" action="{% url 'cart:add' product.id %}">{% csrf_token %}<input type="hidden" name="next" value="{% url 'products:detail' product.slug %}"><label>Số lượng <input type="number" name="quantity" min="1" max="{{ product.stock }}" value="1"></label><button class="button">Thêm vào giỏ hàng</button></form>{% endif %}</div></div>{% if related %}<div class="section related"><div class="section-heading"><h2>Có thể bạn sẽ thích</h2></div><div class="catalog-grid">{% for product in related %}{% include 'partials/product_card.html' %}{% endfor %}</div></div>{% endif %}</section>{% endblock %}
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ product.name }} | Bean & Leaf{% endblock %}
+{% block og_title %}{{ product.name }} | Bean &amp; Leaf{% endblock %}
+{% block og_description %}{{ product.description|truncatechars:200 }}{% endblock %}
+{% block og_url %}{{ og_url }}{% endblock %}
+{% block og_image %}{{ og_image_url }}{% endblock %}
+{% block og_type %}product{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/reviews.css' %}"><link rel="stylesheet" href="{% static 'css/social-share.css' %}">{% endblock %}
+{% block content %}
+<section class="detail-page container">
+  <a class="back-link" href="{% url 'products:list' %}">← Quay lại cửa hàng</a>
+  <div class="detail-grid">
+    <div class="detail-image">
+      {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">
+      {% else %}<img src="{% static 'images/coffee-hero.png' %}" alt="{{ product.name }}">{% endif %}
+    </div>
+    <div class="detail-info">
+      <p class="eyebrow">{{ product.category.name }} · {{ product.get_roast_level_display }}</p>
+      <h1>{{ product.name }}</h1>
+      <p class="detail-price">{{ product.price|stringformat:'d' }}đ</p>
+      <p class="detail-description">{{ product.description }}</p>
+      <dl>
+        <div><dt>Xuất xứ</dt><dd>{{ product.origin|default:'Việt Nam' }}</dd></div>
+        <div><dt>Tình trạng</dt><dd>{% if product.stock %}Còn {{ product.stock }} sản phẩm{% else %}Tạm hết hàng{% endif %}</dd></div>
+      </dl>
+      {% if product.stock %}
+      <form class="add-form" method="post" action="{% url 'cart:add' product.id %}">
+        {% csrf_token %}<input type="hidden" name="next" value="{% url 'products:detail' product.slug %}">
+        <label>Số lượng <input type="number" name="quantity" min="1" max="{{ product.stock }}" value="1"></label>
+        <button class="button">Thêm vào giỏ hàng</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <section class="reviews-section" aria-labelledby="reviews-title">
+    <div class="reviews-heading">
+      <div><p class="eyebrow">Khách hàng chia sẻ</p><h2 id="reviews-title">Đánh giá sản phẩm</h2></div>
+      <p class="review-summary">
+        {% if review_average %}<strong>{{ review_average|floatformat:1 }}/5</strong> · {% endif %}{{ review_count }} đánh giá
+      </p>
+    </div>
+
+    <div class="reviews-layout">
+      <div class="reviews-list">
+        {% for review in reviews %}
+          <article class="review-card">
+            <div class="review-card-heading">
+              <strong>{{ review.user.get_full_name|default:review.user.get_username }}</strong>
+              <span class="review-stars" aria-label="{{ review.rating }} trên 5 sao">{% for star in '12345' %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}</span>
+            </div>
+            <time datetime="{{ review.created_at|date:'c' }}">{{ review.created_at|date:'d/m/Y H:i' }}</time>
+            {% if review.content %}<p>{{ review.content|linebreaksbr }}</p>{% endif %}
+          </article>
+        {% empty %}
+          <p class="reviews-empty">Chưa có đánh giá</p>
+        {% endfor %}
+      </div>
+
+      <div class="review-form-card">
+        {% if user.is_authenticated %}
+          <h3>{% if user_review %}Sửa đánh giá của bạn{% else %}Chia sẻ đánh giá{% endif %}</h3>
+          <form method="post" action="{% url 'products:detail' product.slug %}" class="review-form">
+            {% csrf_token %}
+            <fieldset>
+              <legend>Điểm đánh giá</legend>
+              {% if review_form.rating.errors %}<div class="field-errors">{{ review_form.rating.errors }}</div>{% endif %}
+              <div class="rating-options">
+                {% for radio in review_form.rating %}<label>{{ radio.tag }}<span>{{ radio.choice_label }} ★</span></label>{% endfor %}
+              </div>
+            </fieldset>
+            <div class="review-comment-field">
+              <label for="{{ review_form.content.id_for_label }}">Nhận xét (không bắt buộc)</label>
+              {{ review_form.content }}
+              {% if review_form.content.errors %}<div class="field-errors">{{ review_form.content.errors }}</div>{% endif %}
+            </div>
+            <button class="button" type="submit">{% if user_review %}Cập nhật đánh giá{% else %}Gửi đánh giá{% endif %}</button>
+          </form>
+        {% else %}
+          <h3>Bạn đã dùng sản phẩm?</h3>
+          <p>Đăng nhập để chia sẻ cảm nhận của bạn.</p>
+          <a class="button" href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}">Đăng nhập để đánh giá</a>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <section class="share-section" aria-label="Chia sẻ sản phẩm">
+    <h2>Chia sẻ sản phẩm</h2>
+    <div class="share-controls">
+      <a class="share-button share-facebook" href="https://www.facebook.com/sharer/sharer.php?u={{ og_url|urlencode:'' }}" target="_blank" rel="noopener noreferrer">Chia sẻ Facebook</a>
+      {% if zalo_oa_id %}
+        <div class="zalo-share-button" data-href="{{ og_url }}" data-oaid="{{ zalo_oa_id }}" data-layout="1" data-color="blue" data-customize="false" aria-label="Chia sẻ qua Zalo"></div>
+      {% else %}
+        <button class="share-button share-zalo" type="button" data-copy-share data-copy-url="{{ og_url }}">Sao chép liên kết để chia sẻ trên Zalo</button>
+      {% endif %}
+      <button class="share-button share-copy" type="button" data-copy-share data-copy-url="{{ og_url }}">Sao chép liên kết</button>
+    </div>
+    <p class="share-feedback" role="status" aria-live="polite"></p>
+  </section>
+
+  {% if related %}<div class="section related"><div class="section-heading"><h2>Có thể bạn sẽ thích</h2></div><div class="catalog-grid">{% for product in related %}{% include 'partials/product_card.html' %}{% endfor %}</div></div>{% endif %}
+</section>
+{% endblock %}
+{% block extra_js %}
+  {% if zalo_oa_id %}<script async src="https://sp.zalo.me/plugins/sdk.js"></script>{% endif %}
+  <script src="{% static 'js/social-share.js' %}" defer></script>
+{% endblock %}

@@ -1,9 +1,10 @@
 from django.contrib import messages
-from django.contrib.auth import get_user_model, login
+from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
-from django.db import IntegrityError, transaction
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
-from .forms import LoginForm, SignupForm
+from .forms import LoginForm, SignupForm, UserProfileForm
+from .models import UserProfile
 
 
 def signup(request):
@@ -11,20 +12,31 @@ def signup(request):
         return redirect('home')
     form = SignupForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
-        try:
-            with transaction.atomic():
-                user = form.save()
-        except IntegrityError:
-            user_model = get_user_model()
-            if user_model.objects.filter(username=form.cleaned_data['username']).exists():
-                form.add_error('username', 'Tên đăng nhập này đã được sử dụng.')
-            else:
-                raise
-        else:
-            login(request, user)
-            messages.success(request, 'Chào mừng bạn! Voucher miễn phí vận chuyển đã nằm trong tài khoản.')
-            return redirect('cart:detail')
+        user = form.save()
+        login(request, user)
+        messages.success(request, 'Chào mừng bạn! Voucher miễn phí vận chuyển đã nằm trong tài khoản.')
+        return redirect('cart:detail')
     return render(request, 'accounts/signup.html', {'form': form})
+
+
+@login_required
+def profile(request):
+    user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    form = UserProfileForm(request.POST or None, request.FILES or None, instance=user_profile)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Ảnh đại diện đã được cập nhật.')
+            return redirect('accounts:profile')
+
+    context = {
+        'profile': user_profile,
+        'form': form,
+        'display_name': request.user.get_full_name().strip() or request.user.get_username(),
+        'login_history': request.user.login_history.all()[:20],
+        'orders': request.user.orders.prefetch_related('items'),
+    }
+    return render(request, 'accounts/profile.html', context)
 
 
 class AccountLoginView(LoginView):

@@ -3,7 +3,10 @@ from products.models import Product
 
 
 def home(request):
-    return render(request, 'core/home.html', {'featured_products': Product.objects.filter(is_active=True, is_featured=True)[:4]})
+    featured_products = Product.objects.select_related('category').filter(
+        is_active=True, is_featured=True
+    )[:4]
+    return render(request, 'core/home.html', {'featured_products': featured_products})
 
 
 def content_page(request, page):

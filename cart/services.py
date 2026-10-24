@@ -8,24 +8,18 @@ DELIVERY_FEE = 30000
 def get_cart(session): return session.get(SESSION_KEY, {})
 def cart_count(session): return sum(get_cart(session).values())
 
-def add_product(session, product_id, quantity=1, max_quantity=None):
-    cart = get_cart(session); key = str(product_id)
-    quantity = max(1, quantity)
-    cart[key] = cart.get(key, 0) + quantity
-    if max_quantity is not None:
-        cart[key] = min(cart[key], max_quantity)
+def add_product(session, product_id, quantity=1):
+    cart = get_cart(session); key = str(product_id); cart[key] = cart.get(key, 0) + quantity
     session[SESSION_KEY] = cart; session.modified = True
 
-def set_quantity(session, product_id, quantity, max_quantity=None):
+def set_quantity(session, product_id, quantity):
     cart = get_cart(session); key = str(product_id)
-    if max_quantity is not None:
-        quantity = min(quantity, max_quantity)
     if quantity > 0: cart[key] = quantity
     else: cart.pop(key, None)
     session[SESSION_KEY] = cart; session.modified = True
 
 def cart_items(session):
-    cart = get_cart(session); products = Product.objects.filter(id__in=cart.keys(), is_active=True)
+    cart = get_cart(session); products = Product.objects.filter(id__in=cart.keys(), is_active=True).select_related('category')
     return [{'product': p, 'quantity': cart[str(p.id)], 'subtotal': p.price * cart[str(p.id)]} for p in products]
 
 

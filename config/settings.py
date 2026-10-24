@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import secrets
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -22,13 +24,32 @@ load_dotenv(BASE_DIR / '.env')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#3wo!8-dos4#72gf4@dub#l1yt6y+n5b887y$1(f(g8rr6s6fm'
+def _env_bool(name, default):
+    value = os.getenv(name)
+    if value is None or not value.strip():
+        return default
+    return value.strip().lower() in {'1', 'true', 'yes', 'on'}
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver', 'end-of-course-9.vercel.app','192.168.2.164',]
+# Production must supply its own secret; a random per-process key is enough for local development.
+DEBUG = _env_bool('DEBUG', True)
+SECRET_KEY = os.getenv('SECRET_KEY', '').strip()
+if not SECRET_KEY:
+    if not DEBUG:
+        raise ImproperlyConfigured('Set SECRET_KEY in the environment when DEBUG is false.')
+    SECRET_KEY = secrets.token_urlsafe(50)
+
+_allowed_hosts = os.getenv('ALLOWED_HOSTS', '').strip()
+if not DEBUG and not _allowed_hosts:
+    raise ImproperlyConfigured('Set ALLOWED_HOSTS in the environment when DEBUG is false.')
+ALLOWED_HOSTS = [
+    host.strip() for host in (_allowed_hosts or '127.0.0.1,localhost,testserver').split(',')
+    if host.strip()
+]
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
 
 
 # Application definition
@@ -131,17 +152,18 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/accounts/login/'
+ZALO_OA_ID = os.getenv('ZALO_OA_ID', '').strip()
 
-# SePay / VietQR configuration — supply these via environment variables in production.
-SEPAY_BANK_CODE = os.getenv('SEPAY_BANK_CODE', '')
-SEPAY_ACCOUNT_NUMBER = os.getenv('SEPAY_ACCOUNT_NUMBER', '')
-SEPAY_ACCOUNT_NAME = os.getenv('SEPAY_ACCOUNT_NAME', '')
-SEPAY_WEBHOOK_SECRET = os.getenv('SEPAY_WEBHOOK_SECRET', '')
-SEPAY_WEBHOOK_API_KEY = os.getenv('SEPAY_WEBHOOK_API_KEY', '')
-SEPAY_GATEWAY_MERCHANT_ID = os.getenv('SEPAY_GATEWAY_MERCHANT_ID', '')
-SEPAY_GATEWAY_SECRET_KEY = os.getenv('SEPAY_GATEWAY_SECRET_KEY', '')
-SEPAY_GATEWAY_ENV = os.getenv('SEPAY_GATEWAY_ENV', 'sandbox')
-SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000').rstrip('/')
+# Secure defaults for production. Set USE_X_FORWARDED_PROTO only behind a trusted TLS proxy.
+SECURE_SSL_REDIRECT = _env_bool('SECURE_SSL_REDIRECT', not DEBUG)
+SESSION_COOKIE_SECURE = _env_bool('SESSION_COOKIE_SECURE', not DEBUG)
+CSRF_COOKIE_SECURE = _env_bool('CSRF_COOKIE_SECURE', not DEBUG)
+_hsts_seconds = os.getenv('SECURE_HSTS_SECONDS', '').strip()
+SECURE_HSTS_SECONDS = int(_hsts_seconds) if _hsts_seconds else (31536000 if not DEBUG else 0)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = _env_bool('SECURE_HSTS_INCLUDE_SUBDOMAINS', False)
+SECURE_HSTS_PRELOAD = _env_bool('SECURE_HSTS_PRELOAD', False)
+if _env_bool('USE_X_FORWARDED_PROTO', False):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

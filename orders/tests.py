@@ -1,54 +1,78 @@
-import json
-from django.contrib.auth.models import AnonymousUser
-from django.test import TestCase, override_settings
+from django.contrib.auth import get_user_model
+from django.test import TestCase
 from django.urls import reverse
-from products.models import Category, Product
+
+from .admin import OrderAdmin
 from .models import Order
-from .services import create_order, sepay_checkout_data, sepay_checkout_url
+from .services import create_order
 
 
-class SePayPaymentTests(TestCase):
-    def setUp(self):
-        category = Category.objects.create(name='Cà phê', slug='ca-phe')
-        self.product = Product.objects.create(category=category, name='Cà phê test', slug='ca-phe-test', description='Test', price=120000)
-        self.order = create_order(
+class OrderDeliveryStatusTests(TestCase):
+    def test_new_order_starts_in_packing(self):
+        user = get_user_model().objects.create_user(username='order-user', password='pass12345')
+
+        order = Order.objects.create(
+            user=user,
+            customer_name='Order User',
+            email='order@example.com',
+            phone='0900000000',
+            address='1 Test Street',
+            subtotal=100,
+            shipping_fee=0,
+            total=100,
+            payment_method=Order.COD,
+        )
+
+        self.assertEqual(order.delivery_status, Order.PACKING)
+
+    def test_delivery_statuses_have_required_labels(self):
+        self.assertEqual(
+            Order.DELIVERY_STATUS_CHOICES,
+            [
+                (Order.PACKING, 'Đang đóng gói'),
+                (Order.SHIPPING, 'Đang giao'),
+                (Order.DELIVERED, 'Đã giao'),
+            ],
+        )
+
+    def test_admin_can_quick_edit_delivery_status(self):
+        self.assertIn('delivery_status', OrderAdmin.list_editable)
+
+
+class CheckoutDeliveryStatusTests(TestCase):
+    def test_success_page_shows_order_confirmation_and_delivery_status(self):
+        order = Order.objects.create(
+            user=None,
+            customer_name='Guest Customer',
+            email='guest@example.com',
+            phone='0900000000',
+            address='1 Guest Street',
+            subtotal=100,
+            shipping_fee=0,
+            total=100,
+            payment_method=Order.COD,
+        )
+
+        response = self.client.get(reverse('checkout-success', kwargs={'code': order.code}))
+
+        self.assertContains(response, 'Đặt hàng thành công')
+        self.assertContains(response, 'Đang đóng gói')
+
+    def test_guest_order_creation_remains_cash_on_delivery(self):
+        from django.contrib.auth.models import AnonymousUser
+
+        order = create_order(
             user=AnonymousUser(),
-            summary={'items': [{'product': self.product, 'quantity': 1, 'subtotal': 120000}], 'subtotal': 120000, 'shipping': 30000, 'total': 150000, 'voucher': None},
-            data={'name': 'Bean', 'email': 'bean@example.com', 'phone': '0900000000', 'address': 'Hà Nội', 'payment': Order.SEPAY},
+            summary={'subtotal': 100, 'shipping': 0, 'total': 100, 'voucher': None, 'items': []},
+            data={
+                'name': 'Guest Customer',
+                'email': 'guest@example.com',
+                'phone': '0900000000',
+                'address': '1 Guest Street',
+                'payment': Order.COD,
+            },
         )
 
-    @override_settings(SEPAY_GATEWAY_MERCHANT_ID='SP-TEST-123', SEPAY_GATEWAY_SECRET_KEY='test-secret', SEPAY_GATEWAY_ENV='sandbox')
-    def test_checkout_payload_contains_signed_payment_details(self):
-        payload = sepay_checkout_data(self.order)
-        self.assertEqual(payload['merchant'], 'SP-TEST-123')
-        self.assertEqual(payload['order_amount'], str(self.order.total))
-        self.assertEqual(payload['order_invoice_number'], self.order.code)
-        self.assertTrue(payload['signature'])
-        self.assertEqual(sepay_checkout_url(), 'https://pay-sandbox.sepay.vn/v1/checkout/init')
-
-    @override_settings(SEPAY_GATEWAY_SECRET_KEY='demo-secret')
-    def test_ipn_marks_matching_order_paid(self):
-        payload = {'timestamp': 1760000000, 'notification_type': 'ORDER_PAID', 'order': {'order_invoice_number': self.order.code}, 'transaction': {'transaction_id': 'FT-91', 'transaction_amount': str(self.order.total)}}
-        body = json.dumps(payload).encode()
-        response = self.client.post(reverse('sepay-webhook'), data=body, content_type='application/json', HTTP_X_SECRET_KEY='demo-secret')
-        self.assertEqual(response.status_code, 200)
-        self.order.refresh_from_db()
-        self.assertEqual(self.order.payment_status, Order.PAID)
-
-    @override_settings(SEPAY_GATEWAY_SECRET_KEY='demo-secret')
-    def test_ipn_ignores_invalid_amount_without_crashing(self):
-        payload = {
-            'notification_type': 'ORDER_PAID',
-            'order': {'order_invoice_number': self.order.code},
-            'transaction': {'transaction_id': 'FT-invalid', 'transaction_amount': 'not-a-number'},
-        }
-
-        response = self.client.post(
-            reverse('sepay-webhook'), data=json.dumps(payload), content_type='application/json', HTTP_X_SECRET_KEY='demo-secret'
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.order.refresh_from_db()
-        self.assertEqual(self.order.payment_status, Order.PENDING)
-
-# Create your tests here.
+        self.assertIsNone(order.user)
+        self.assertEqual(order.payment_method, Order.COD)
+        self.assertEqual(order.delivery_status, Order.PACKING)
