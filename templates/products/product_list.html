@@ -1,3 +1,53 @@
 {% extends 'base.html' %}
 {% block title %}Cà phê & Dụng cụ pha chế | Bean & Leaf{% endblock %}
-{% block content %}<section class="catalog-page"><div class="container"><div class="page-heading"><p class="eyebrow">Bean &amp; Leaf shop</p><h1>Cà phê &amp; Dụng cụ pha chế</h1></div><button class="filter-trigger" onclick="document.body.classList.add('filters-open')">☷ Lọc sản phẩm</button><div class="shop-layout"><aside class="filters"><button class="close-filter" onclick="document.body.classList.remove('filters-open')">×</button><form method="get"><div class="filter-search"><input name="q" value="{{ request.GET.q }}" placeholder="Tìm kiếm..."><button>⌕</button></div><div class="filter-group"><h3>Danh mục</h3>{% for category in categories %}<label><input type="checkbox" name="category" value="{{ category.slug }}" {% if category.slug in request.GET.getlist.category %}checked{% endif %}> {{ category.name }}</label>{% endfor %}</div><div class="filter-group"><h3>Khoảng giá</h3><label><input type="radio" name="price" value="under-150" {% if request.GET.price == 'under-150' %}checked{% endif %}> Dưới 150.000đ</label><label><input type="radio" name="price" value="150-300" {% if request.GET.price == '150-300' %}checked{% endif %}> 150.000 – 300.000đ</label><label><input type="radio" name="price" value="over-300" {% if request.GET.price == 'over-300' %}checked{% endif %}> Trên 300.000đ</label></div><div class="filter-group"><h3>Mức độ rang</h3>{% for value, label in roasts %}<label><input type="checkbox" name="roast" value="{{ value }}" {% if value in request.GET.getlist.roast %}checked{% endif %}> {{ label }}</label>{% endfor %}</div><button class="button full">Áp dụng</button><a class="clear-filters" href="{% url 'products:list' %}">Xóa bộ lọc</a></form></aside><div class="products-area"><div class="catalog-top"><p>{{ page_obj.paginator.count }} sản phẩm</p><span>Hiển thị các sản phẩm tuyển chọn</span></div><div class="catalog-grid">{% for product in products %}{% include 'partials/product_card.html' %}{% empty %}<div class="empty-state"><h2>Chưa tìm thấy sản phẩm</h2><p>Hãy thử xóa bớt bộ lọc hoặc tìm kiếm từ khóa khác.</p><a class="button" href="{% url 'products:list' %}">Xem toàn bộ</a></div>{% endfor %}</div>{% if is_paginated %}<nav class="pagination">{% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">←</a>{% endif %}<span>Trang {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">→</a>{% endif %}</nav>{% endif %}</div></div></div></section>{% endblock %}
+{% block content %}<section class="catalog-page">
+    <div class="container">
+        <div class="page-heading">
+            <p class="eyebrow">Bean &amp; Leaf shop</p>
+            <h1>Cà phê &amp; Dụng cụ pha chế</h1>
+        </div><button class="filter-trigger" onclick="document.body.classList.add('filters-open')">☷ Lọc sản
+            phẩm</button>
+        <div class="shop-layout">
+            <aside class="filters"><button class="close-filter"
+                    onclick="document.body.classList.remove('filters-open')">×</button>
+                <form method="get">
+                    <div class="filter-search"><input name="q" value="{{ request.GET.q }}"
+                            placeholder="Tìm kiếm..."><button>⌕</button></div>
+                    <div class="filter-group">
+                        <h3>Danh mục</h3>{% for category in categories %}<label><input type="checkbox" name="category"
+                                value="{{ category.slug }}" {% if category.slug in request.GET.getlist.category
+                                %}checked{% endif %}> {{ category.name }}</label>{% endfor %}
+                    </div>
+                    <div class="filter-group">
+                        <h3>Khoảng giá</h3><label><input type="radio" name="price" value="under-150" {% if
+                                request.GET.price=='under-150' %}checked{% endif %}> Dưới 150.000đ</label><label><input
+                                type="radio" name="price" value="150-300" {% if request.GET.price=='150-300' %}checked{%
+                                endif %}> 150.000 – 300.000đ</label><label><input type="radio" name="price"
+                                value="over-300" {% if request.GET.price=='over-300' %}checked{% endif %}> Trên
+                            300.000đ</label>
+                    </div>
+                    <div class="filter-group">
+                        <h3>Mức độ rang</h3>{% for value, label in roasts %}<label><input type="checkbox" name="roast"
+                                value="{{ value }}" {% if value in request.GET.getlist.roast %}checked{% endif %}> {{
+                            label }}</label>{% endfor %}
+                    </div><button class="button full">Áp dụng</button><a class="clear-filters"
+                        href="{% url 'products:list' %}">Xóa bộ lọc</a>
+                </form>
+            </aside>
+            <div class="products-area">
+                <div class="catalog-top">
+                    <p>{{ page_obj.paginator.count }} sản phẩm</p><span>Hiển thị các sản phẩm tuyển chọn</span>
+                </div>
+                <div class="catalog-grid">{% for product in products %}{% include 'partials/product_card.html' %}{%
+                    empty %}<div class="empty-state">
+                        <h2>Chưa tìm thấy sản phẩm</h2>
+                        <p>Hãy thử xóa bớt bộ lọc hoặc tìm kiếm từ khóa khác.</p><a class="button"
+                            href="{% url 'products:list' %}">Xem toàn bộ</a>
+                    </div>{% endfor %}</div>{% if is_paginated %}<nav class="pagination">{% if page_obj.has_previous
+                    %}<a href="?page={{ page_obj.previous_page_number }}">←</a>{% endif %}<span>Trang {{ page_obj.number
+                        }} / {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a
+                        href="?page={{ page_obj.next_page_number }}">→</a>{% endif %}</nav>{% endif %}
+            </div>
+        </div>
+    </div>
+</section>{% endblock %}

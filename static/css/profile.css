@@ -1,37 +1,235 @@
-.profile-page{padding:48px 0 80px;min-height:62vh}
-.profile-page .page-heading{margin-bottom:28px}
-.profile-page .page-heading h1{font-size:clamp(2rem,4vw,3rem)}
-.profile-grid{display:grid;grid-template-columns:.82fr 1.18fr;gap:18px}
-.profile-card{background:#fffdf9;border:1px solid var(--line);padding:22px;border-radius:5px;min-width:0}
-.profile-identity{display:grid;grid-template-columns:76px 1fr;gap:16px;align-items:center;align-content:start}
-.profile-avatar{width:76px;height:76px;border-radius:50%;object-fit:cover;background:#e9eee4}
-.profile-identity h2,.profile-section-heading h2{font-family:'DM Sans',sans-serif;font-size:1.12rem;margin:0 0 3px}
-.profile-muted,.profile-empty{color:var(--muted);font-size:.8rem;margin:0}
-.profile-identity .eyebrow,.profile-section-heading .eyebrow{margin-bottom:3px}
-.profile-avatar-form{grid-column:1/-1;border-top:1px solid var(--line);padding-top:17px;display:grid;gap:8px}
-.profile-avatar-form label{font-size:.78rem;font-weight:600}
-.profile-avatar-form input[type=file]{width:100%;font:inherit;font-size:.73rem}
-.profile-avatar-form .button{justify-self:start;padding:8px 14px;font-size:.75rem}
-.form-error{color:#a33;font-size:.72rem}
-.profile-section-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
-.profile-count{border-radius:20px;background:#eff1e8;color:var(--green);padding:4px 9px;font-size:.65rem;white-space:nowrap}
-.profile-table-wrap{overflow:auto}
-.profile-table{width:100%;border-collapse:collapse;font-size:.76rem}
-.profile-table th{text-align:left;color:var(--muted);font-size:.67rem;font-weight:600;padding:9px 8px;border-bottom:1px solid var(--line)}
-.profile-table td{padding:11px 8px;border-bottom:1px solid #eeeee8}
-.profile-table tr:last-child td{border-bottom:0}
-.profile-orders{grid-column:1/-1}
-.profile-order-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.profile-order{border:1px solid #e7e8e1;background:#fff;padding:15px}
-.profile-order-heading,.profile-order-meta{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.profile-order-heading strong{font-size:.85rem}
-.profile-order-meta{border-top:1px solid #eeeee8;margin-top:12px;padding-top:10px;color:var(--muted);font-size:.72rem}
-.profile-order-meta strong{color:var(--green);font-size:.82rem}
-.delivery-status{border-radius:20px;background:#eff1e8;color:var(--green);padding:5px 9px;font-size:.67rem;font-weight:700;white-space:nowrap}
-.status-shipping{background:#fff0d6;color:#8b5b10}
-.status-delivered{background:#e1f2e3;color:#2d7135}
-.profile-order-items{list-style:none;padding:0;margin:9px 0 0;color:var(--muted);font-size:.72rem}
-.profile-order-items li{display:flex;justify-content:space-between;gap:10px;padding-top:5px}
-.profile-empty{padding:14px 0}
-.profile-empty .button{margin-top:12px;font-size:.74rem}
-@media(max-width:800px){.profile-grid{grid-template-columns:1fr}.profile-orders{grid-column:auto}.profile-order-list{grid-template-columns:1fr}}
+.profile-page {
+    padding: 48px 0 80px;
+    min-height: 62vh
+}
+
+.profile-page .page-heading {
+    margin-bottom: 28px
+}
+
+.profile-page .page-heading h1 {
+    font-size: clamp(2rem, 4vw, 3rem)
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: .82fr 1.18fr;
+    gap: 18px
+}
+
+.profile-card {
+    background: #fffdf9;
+    border: 1px solid var(--line);
+    padding: 22px;
+    border-radius: 5px;
+    min-width: 0
+}
+
+.profile-identity {
+    display: grid;
+    grid-template-columns: 76px 1fr;
+    gap: 16px;
+    align-items: center;
+    align-content: start
+}
+
+.profile-avatar {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #e9eee4
+}
+
+.profile-identity h2,
+.profile-section-heading h2 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.12rem;
+    margin: 0 0 3px
+}
+
+.profile-muted,
+.profile-empty {
+    color: var(--muted);
+    font-size: .8rem;
+    margin: 0
+}
+
+.profile-identity .eyebrow,
+.profile-section-heading .eyebrow {
+    margin-bottom: 3px
+}
+
+.profile-avatar-form {
+    grid-column: 1/-1;
+    border-top: 1px solid var(--line);
+    padding-top: 17px;
+    display: grid;
+    gap: 8px
+}
+
+.profile-avatar-form label {
+    font-size: .78rem;
+    font-weight: 600
+}
+
+.profile-avatar-form input[type=file] {
+    width: 100%;
+    font: inherit;
+    font-size: .73rem
+}
+
+.profile-avatar-form .button {
+    justify-self: start;
+    padding: 8px 14px;
+    font-size: .75rem
+}
+
+.form-error {
+    color: #a33;
+    font-size: .72rem
+}
+
+.profile-section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px
+}
+
+.profile-count {
+    border-radius: 20px;
+    background: #eff1e8;
+    color: var(--green);
+    padding: 4px 9px;
+    font-size: .65rem;
+    white-space: nowrap
+}
+
+.profile-table-wrap {
+    overflow: auto
+}
+
+.profile-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .76rem
+}
+
+.profile-table th {
+    text-align: left;
+    color: var(--muted);
+    font-size: .67rem;
+    font-weight: 600;
+    padding: 9px 8px;
+    border-bottom: 1px solid var(--line)
+}
+
+.profile-table td {
+    padding: 11px 8px;
+    border-bottom: 1px solid #eeeee8
+}
+
+.profile-table tr:last-child td {
+    border-bottom: 0
+}
+
+.profile-orders {
+    grid-column: 1/-1
+}
+
+.profile-order-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px
+}
+
+.profile-order {
+    border: 1px solid #e7e8e1;
+    background: #fff;
+    padding: 15px
+}
+
+.profile-order-heading,
+.profile-order-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px
+}
+
+.profile-order-heading strong {
+    font-size: .85rem
+}
+
+.profile-order-meta {
+    border-top: 1px solid #eeeee8;
+    margin-top: 12px;
+    padding-top: 10px;
+    color: var(--muted);
+    font-size: .72rem
+}
+
+.profile-order-meta strong {
+    color: var(--green);
+    font-size: .82rem
+}
+
+.delivery-status {
+    border-radius: 20px;
+    background: #eff1e8;
+    color: var(--green);
+    padding: 5px 9px;
+    font-size: .67rem;
+    font-weight: 700;
+    white-space: nowrap
+}
+
+.status-shipping {
+    background: #fff0d6;
+    color: #8b5b10
+}
+
+.status-delivered {
+    background: #e1f2e3;
+    color: #2d7135
+}
+
+.profile-order-items {
+    list-style: none;
+    padding: 0;
+    margin: 9px 0 0;
+    color: var(--muted);
+    font-size: .72rem
+}
+
+.profile-order-items li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 5px
+}
+
+.profile-empty {
+    padding: 14px 0
+}
+
+.profile-empty .button {
+    margin-top: 12px;
+    font-size: .74rem
+}
+
+@media(max-width:800px) {
+    .profile-grid {
+        grid-template-columns: 1fr
+    }
+
+    .profile-orders {
+        grid-column: auto
+    }
+
+    .profile-order-list {
+        grid-template-columns: 1fr
+    }
+}

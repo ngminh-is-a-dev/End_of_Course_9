@@ -1,5 +1,15 @@
 {% extends 'base.html' %}
 {% block title %}Đăng ký | Bean & Leaf{% endblock %}
 {% block content %}
-<section class="auth-page page-enter"><div class="auth-card card-enter"><p class="eyebrow">Bean &amp; Leaf club</p><h1>Đăng ký tài khoản</h1><p class="auth-intro">Tạo tài khoản và nhận ngay voucher miễn phí vận chuyển cho đơn hàng đầu tiên.</p><form method="post" class="auth-form">{% csrf_token %}{% for field in form %}<label>{{ field.label }}{{ field }}{% for error in field.errors %}<small class="form-error">{{ error }}</small>{% endfor %}</label>{% endfor %}<button class="button full" type="submit">Tạo tài khoản &amp; nhận freeship</button></form><p class="auth-switch">Đã có tài khoản? <a href="{% url 'accounts:login' %}">Đăng nhập</a></p></div></section>
+<section class="auth-page page-enter">
+    <div class="auth-card card-enter">
+        <p class="eyebrow">Bean &amp; Leaf club</p>
+        <h1>Đăng ký tài khoản</h1>
+        <p class="auth-intro">Tạo tài khoản và nhận ngay voucher miễn phí vận chuyển cho đơn hàng đầu tiên.</p>
+        <form method="post" class="auth-form">{% csrf_token %}{% for field in form %}<label>{{ field.label }}{{ field
+                }}{% for error in field.errors %}<small class="form-error">{{ error }}</small>{% endfor %}</label>{%
+            endfor %}<button class="button full" type="submit">Tạo tài khoản &amp; nhận freeship</button></form>
+        <p class="auth-switch">Đã có tài khoản? <a href="{% url 'accounts:login' %}">Đăng nhập</a></p>
+    </div>
+</section>
 {% endblock %}

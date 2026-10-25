@@ -1,7 +1,56 @@
 {% extends 'base.html' %}{% load static %}
 {% block title %}Bean & Leaf | Cà phê ngon{% endblock %}
 {% block content %}
-<section class="hero"><div class="container hero-grid"><div class="hero-copy"><p class="eyebrow">Welcome to</p><h1>Bean &amp; Leaf</h1><h2>Cà phê ngon, không gian chill</h2><p>Nơi lý tưởng để thưởng thức những ly cà phê đầy cảm hứng, trong một không gian ấm cúng và hiện đại.</p><div class="hero-buttons"><a class="button" href="{% url 'products:list' %}">Đặt bàn ngay</a><a class="button outline" href="#why">Xem menu</a></div></div><div class="hero-photo"><img src="{% static 'images/coffee-hero.png' %}" alt="Bộ cà phê Bean & Leaf"></div></div></section>
-<section id="why" class="container section why"><div class="section-heading"><p class="eyebrow">Crafted with care</p><h2>Tại sao chọn Bean &amp; Leaf?</h2><p>Mỗi trải nghiệm được pha chế từ sự tinh tế và tình yêu cà phê.</p></div><div class="benefit-grid"><article><div class="benefit-icon">☕</div><h3>Nguyên liệu sạch</h3><p>100% cà phê rang mộc, chọn lọc từ những vùng trồng tốt nhất.</p></article><article><div class="benefit-icon">♧</div><h3>Không gian thư giãn</h3><p>Thiết kế tối giản, ánh sáng dịu nhẹ, thích hợp cho mọi cuộc gặp gỡ.</p></article><article><div class="benefit-icon">⌁</div><h3>Internet tốc độ cao</h3><p>Không gian làm việc lý tưởng để bạn tập trung và sáng tạo.</p></article><article><div class="benefit-icon">♙</div><h3>Nhân viên thân thiện</h3><p>Luôn nhiệt tình phục vụ, mang đến cảm giác như ở nhà.</p></article></div></section>
-<section class="feature-strip"><div class="container section"><div class="section-heading light"><p class="eyebrow">Shop the collection</p><h2>Cà phê được yêu thích</h2></div><div class="catalog-grid">{% for product in featured_products %}{% include 'partials/product_card.html' %}{% empty %}<p>Danh mục đang được cập nhật.</p>{% endfor %}</div></div></section>
+<section class="hero">
+    <div class="container hero-grid">
+        <div class="hero-copy">
+            <p class="eyebrow">Welcome to</p>
+            <h1>Bean &amp; Leaf</h1>
+            <h2>Cà phê ngon, không gian chill</h2>
+            <p>Nơi lý tưởng để thưởng thức những ly cà phê đầy cảm hứng, trong một không gian ấm cúng và hiện đại.</p>
+            <div class="hero-buttons"><a class="button" href="{% url 'products:list' %}">Đặt bàn ngay</a><a
+                    class="button outline" href="#why">Xem menu</a></div>
+        </div>
+        <div class="hero-photo"><img src="{% static 'images/coffee-hero.png' %}" alt="Bộ cà phê Bean & Leaf"></div>
+    </div>
+</section>
+<section id="why" class="container section why">
+    <div class="section-heading">
+        <p class="eyebrow">Crafted with care</p>
+        <h2>Tại sao chọn Bean &amp; Leaf?</h2>
+        <p>Mỗi trải nghiệm được pha chế từ sự tinh tế và tình yêu cà phê.</p>
+    </div>
+    <div class="benefit-grid">
+        <article>
+            <div class="benefit-icon">☕</div>
+            <h3>Nguyên liệu sạch</h3>
+            <p>100% cà phê rang mộc, chọn lọc từ những vùng trồng tốt nhất.</p>
+        </article>
+        <article>
+            <div class="benefit-icon">🌳</div>
+            <h3>Không gian thư giãn</h3>
+            <p>Thiết kế tối giản, ánh sáng dịu nhẹ, thích hợp cho mọi cuộc gặp gỡ.</p>
+        </article>
+        <article>
+            <div class="benefit-icon">⚡</div>
+            <h3>Internet tốc độ cao</h3>
+            <p>Không gian làm việc lý tưởng để bạn tập trung và sáng tạo.</p>
+        </article>
+        <article>
+            <div class="benefit-icon">🫂</div>
+            <h3>Nhân viên thân thiện</h3>
+            <p>Luôn nhiệt tình phục vụ, mang đến cảm giác như ở nhà.</p>
+        </article>
+    </div>
+</section>
+<section class="feature-strip">
+    <div class="container section">
+        <div class="section-heading light">
+            <p class="eyebrow">Shop the collection</p>
+            <h2>Cà phê được yêu thích</h2>
+        </div>
+        <div class="catalog-grid">{% for product in featured_products %}{% include 'partials/product_card.html' %}{%
+            empty %}<p>Danh mục đang được cập nhật.</p>{% endfor %}</div>
+    </div>
+</section>
 {% endblock %}

@@ -1,3 +1,11 @@
 {% extends 'base.html' %}
 {% block title %}Đặt hàng thành công | Bean & Leaf{% endblock %}
-{% block content %}<section class="container success-page"><div class="success-mark">✓</div><p class="eyebrow">Đơn hàng {{ order.code }}</p><h1>Đặt hàng thành công</h1><p>Đơn hàng của bạn đã được ghi nhận. Trạng thái hiện tại: <strong>{{ order.get_delivery_status_display }}</strong>.</p><p>Bean &amp; Leaf sẽ sớm liên hệ để xác nhận và giao cà phê đến bạn.</p><a class="button" href="{% url 'products:list' %}">Tiếp tục mua sắm</a></section>{% endblock %}
+{% block content %}<section class="container success-page">
+    <div class="success-mark">✓</div>
+    <p class="eyebrow">Đơn hàng {{ order.code }}</p>
+    <h1>Đặt hàng thành công</h1>
+    <p>Đơn hàng của bạn đã được ghi nhận. Trạng thái hiện tại: <strong>{{ order.get_delivery_status_display }}</strong>.
+    </p>
+    <p>Bean &amp; Leaf sẽ sớm liên hệ để xác nhận và giao cà phê đến bạn.</p><a class="button"
+        href="{% url 'products:list' %}">Tiếp tục mua sắm</a>
+</section>{% endblock %}
