@@ -49,8 +49,7 @@
             <p class="eyebrow">Shop the collection</p>
             <h2>Cà phê được yêu thích</h2>
         </div>
-        <div class="catalog-grid">{% for product in featured_products %}{% include 'partials/product_card.html' %}{%
-            empty %}<p>Danh mục đang được cập nhật.</p>{% endfor %}</div>
+        <div class="catalog-grid">{% for product in featured_products %}{% include 'partials/product_card.html' %}{% empty %}<p>Danh mục đang được cập nhật.</p>{% endfor %}</div>
     </div>
 </section>
 {% endblock %}
