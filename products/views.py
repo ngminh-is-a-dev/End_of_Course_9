@@ -1,3 +1,5 @@
+from multiprocessing import context
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -38,6 +40,10 @@ class ProductDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         reviews = self.object.reviews.select_related('user').order_by('-created_at')
         stats = self.object.reviews.aggregate(average=Avg('rating'), count=Count('id'))
+        
+        context["selected_categories"] = self.request.GET.getlist("category")
+        context["selected_roasts"] = self.request.GET.getlist("roast")
+        
         user_review = None
         if self.request.user.is_authenticated:
             user_review = ProductReview.objects.filter(product=self.object, user=self.request.user).first()
