@@ -1,6 +1,7 @@
 from django.test import Client, TestCase
 from django.urls import reverse
 from .models import Category, Product, ProductReview
+from .selectors import get_filtered_products
 
 
 class ProductCatalogueTests(TestCase):
@@ -31,6 +32,60 @@ class ProductCatalogueTests(TestCase):
         response = self.client.get('/api/products/rang-dam/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['category_slug'], 'ca-phe-hat')
+
+    def test_price_filters_do_not_overlap_and_include_prices_above_100_million(self):
+        from django.http import QueryDict
+
+        category = Product.objects.get(slug='rang-dam').category
+        products = {}
+        for slug, price in {
+            'under-boundary': 149999,
+            'middle-start': 150000,
+            'middle-end': 300000,
+            'over-boundary': 300001,
+            'high-price': 150000000,
+        }.items():
+            products[slug] = Product.objects.create(
+                category=category,
+                name=slug,
+                slug=slug,
+                description='Boundary fixture',
+                price=price,
+            )
+
+        under = set(get_filtered_products(QueryDict('price=under-150')).values_list('slug', flat=True))
+        middle = set(get_filtered_products(QueryDict('price=150-300')).values_list('slug', flat=True))
+        over = set(get_filtered_products(QueryDict('price=over-300')).values_list('slug', flat=True))
+
+        self.assertIn('under-boundary', under)
+        self.assertNotIn('middle-start', under)
+        self.assertIn('middle-start', middle)
+        self.assertIn('middle-end', middle)
+        self.assertNotIn('middle-end', over)
+        self.assertIn('over-boundary', over)
+        self.assertIn('high-price', over)
+
+    def test_catalogue_pagination_keeps_active_filters(self):
+        category = Product.objects.get(slug='rang-dam').category
+        for index in range(10):
+            Product.objects.create(
+                category=category,
+                name=f'Batch coffee {index}',
+                slug=f'batch-coffee-{index}',
+                description='Pagination fixture',
+                price=120000,
+                roast_level='medium',
+            )
+
+        response = self.client.get(reverse('products:list'), {
+            'q': 'Batch',
+            'category': 'ca-phe-hat',
+            'price': 'under-150',
+            'roast': 'medium',
+        })
+
+        self.assertTrue(response.context['page_obj'].has_next())
+        self.assertContains(response, '?q=Batch&amp;category=ca-phe-hat&amp;price=under-150&amp;roast=medium&amp;page=2')
 
 
 class ProductReviewModelTests(TestCase):

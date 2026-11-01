@@ -53,9 +53,9 @@ Voucher gắn với một user và chỉ được áp dụng khi thuộc user đ
 
 Session lưu ID sản phẩm và số lượng. Service tải lại các sản phẩm đang hoạt động, tính tiền theo giá hiện tại và tạo bản tóm tắt đơn. Checkout yêu cầu họ tên, số điện thoại, email, địa chỉ và `payment=cod`; phương thức khác bị từ chối. Đơn mới gắn với user nếu đã đăng nhập, nếu không thì `user` để trống. `OrderItem` lưu tên và đơn giá tại thời điểm đặt hàng.
 
-Sau khi tạo đơn, view xóa giỏ và voucher khỏi session, đánh dấu voucher đã dùng nếu đơn có voucher rồi chuyển tới trang xác nhận. Mã đơn có dạng `BL` kèm chuỗi ngẫu nhiên. Trạng thái ban đầu là `delivery_status=packing` và `payment_status=pending`. Admin thay đổi trạng thái giao hàng và thanh toán riêng; chuyển sang `delivered` không tự đổi trạng thái thanh toán. Khách thấy trạng thái giao hàng trong hồ sơ sau khi tải lại trang.
+Việc tạo đơn, tạo order item, trừ tồn kho và đánh dấu voucher đã dùng nằm trong một transaction. Service khóa các sản phẩm trên database hỗ trợ row lock, sau đó cập nhật tồn kho có điều kiện `stock >= quantity`; nếu thiếu hàng hoặc voucher không còn hợp lệ thì transaction rollback và không tạo đơn một phần. Đơn dùng giá hiện tại đọc trong bước checkout. Sau khi tạo đơn thành công, view xóa giỏ và voucher khỏi session rồi chuyển tới trang xác nhận. Mã đơn có dạng `BL` kèm chuỗi ngẫu nhiên. Trạng thái ban đầu là `delivery_status=packing` và `payment_status=pending`. Admin thay đổi trạng thái giao hàng và thanh toán riêng; chuyển sang `delivered` không tự đổi trạng thái thanh toán. Khách thấy trạng thái giao hàng trong hồ sơ sau khi tải lại trang.
 
-Hiện checkout chưa trừ tồn kho, chưa bọc toàn bộ tạo đơn và đánh dấu voucher trong một transaction/khóa xử lý đồng thời, chưa gửi email xác nhận và chưa tích hợp thanh toán trực tuyến. Không có quy trình tự động buộc các trạng thái giao hàng theo một thứ tự.
+Checkout hiện chưa gửi email xác nhận và chưa tích hợp thanh toán trực tuyến. Chưa có kiểm thử tải hoặc kiểm thử đồng thời trên môi trường production; hành vi locking phụ thuộc database backend. Không có quy trình tự động buộc các trạng thái giao hàng theo một thứ tự.
 
 ### Đánh giá và chia sẻ
 
@@ -111,7 +111,7 @@ Các index hiện có bao gồm Product `(is_active, category)` và `(is_active,
 
 ## 7. Kiểm chứng, thách thức và giới hạn
 
-Báo cáo kết quả trước đó ghi nhận 40 test đạt: 36 test baseline, 2 test query và 2 test bảo mật. Các test bao phủ catalogue/API, giỏ/voucher, COD, profile/quyền sở hữu/avatar/lịch sử đăng nhập, review/chia sẻ, CSRF, escaping và hồi quy truy vấn. Đây là kết quả được ghi nhận trong đợt Week 6; báo cáo này không chạy lại test.
+Đợt rà soát bug chạy toàn bộ suite và ghi nhận 51 test đạt. Trước đợt này, Week 6 đã ghi nhận 40 test đạt (36 baseline, 2 test query và 2 test bảo mật); các ca mới bổ sung kiểm tra ranh giới lọc giá, giữ bộ lọc khi phân trang, dữ liệu checkout, điều hướng sau khi thêm giỏ và tồn kho. Các test vẫn chạy local; không bao gồm kiểm thử tải hoặc đồng thời production.
 
 | Vấn đề được ghi nhận | Cách xử lý | Giới hạn |
 | --- | --- | --- |
@@ -119,6 +119,7 @@ Báo cáo kết quả trước đó ghi nhận 40 test đạt: 36 test baseline,
 | Hồ sơ tải Product dù chỉ hiển thị snapshot tên mua | Prefetch order items và bỏ quan hệ Product không dùng; 7 xuống 6 query | Đơn hàng và đánh giá chưa phân trang |
 | Trạng thái giao COD có thể bị nhầm với trạng thái thu tiền | Tách `delivery_status` và `payment_status`; Admin chỉnh riêng | Chưa có quy trình trạng thái tự động |
 | Response API raw list có thể tăng theo catalogue | README và report nêu rõ chưa phân trang | Cần thiết kế phân trang khi quy mô catalogue đòi hỏi |
+| Có thể thêm/đặt số lượng vượt kho | Chặn hàng hết, giới hạn số lượng ở giỏ; kiểm tra tồn kho và trừ kho cùng transaction checkout | Chưa chạy kiểm thử đồng thời/tải trên database production |
 | Thiết lập local khác yêu cầu production | Giá trị bảo mật phụ thuộc `DEBUG`; proxy header là opt-in | Chưa xác minh TLS/proxy trên môi trường thật |
 
 Kết quả test và query count là kiểm tra local, không phải clean-machine installation, kiểm thử tải, benchmark độ trễ hay security audit toàn diện. Chi tiết các lệnh chạy và phạm vi giới hạn được nêu trong [README](../README.md#kiểm-tra-và-tài-liệu-khác).

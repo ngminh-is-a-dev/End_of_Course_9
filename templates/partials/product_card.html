@@ -7,9 +7,11 @@
         <h3><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h3>
         <p class="product-origin">{{ product.origin|default:'Hương vị cân bằng' }}</p>
         <div class="product-bottom"><strong>{{ product.price|stringformat:'d' }}đ</strong>
+            {% if product.stock %}
             <form method="post" action="{% url 'cart:add' product.id %}">{% csrf_token %}<input type="hidden"
                     name="next" value="{{ request.get_full_path }}"><button aria-label="Thêm {{ product.name }}"
                     class="add-button">+</button></form>
+            {% else %}<span class="product-out-of-stock">Tạm hết hàng</span>{% endif %}
         </div>
     </div>
 </article>

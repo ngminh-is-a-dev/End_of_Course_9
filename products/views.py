@@ -27,6 +27,16 @@ class ProductListView(ListView):
         context['roasts'] = Product.ROAST_CHOICES
         context['selected_categories'] = self.request.GET.getlist('category')
         context['selected_roasts'] = self.request.GET.getlist('roast')
+        query_params = self.request.GET.copy()
+        query_params.pop('page', None)
+        for key, page in (
+            ('previous_page_url', context['page_obj'].previous_page_number() if context['page_obj'].has_previous() else None),
+            ('next_page_url', context['page_obj'].next_page_number() if context['page_obj'].has_next() else None),
+        ):
+            if page is not None:
+                page_params = query_params.copy()
+                page_params['page'] = page
+                context[key] = f'?{page_params.urlencode()}'
         return context
 
 

@@ -8,13 +8,21 @@ DELIVERY_FEE = 30000
 def get_cart(session): return session.get(SESSION_KEY, {})
 def cart_count(session): return sum(get_cart(session).values())
 
-def add_product(session, product_id, quantity=1):
-    cart = get_cart(session); key = str(product_id); cart[key] = cart.get(key, 0) + quantity
+def add_product(session, product_id, quantity=1, *, stock=None):
+    cart = get_cart(session); key = str(product_id)
+    if stock is not None:
+        if stock <= 0:
+            cart.pop(key, None)
+        else:
+            cart[key] = min(cart.get(key, 0) + quantity, stock)
+    else:
+        cart[key] = cart.get(key, 0) + quantity
     session[SESSION_KEY] = cart; session.modified = True
 
-def set_quantity(session, product_id, quantity):
+def set_quantity(session, product_id, quantity, *, stock=None):
     cart = get_cart(session); key = str(product_id)
-    if quantity > 0: cart[key] = quantity
+    if quantity > 0 and stock is not None and stock > 0: cart[key] = min(quantity, stock)
+    elif quantity > 0: cart.pop(key, None)
     else: cart.pop(key, None)
     session[SESSION_KEY] = cart; session.modified = True
 

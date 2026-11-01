@@ -15,9 +15,59 @@ class SessionCartTests(TestCase):
 
     def test_add_product_to_session_cart(self):
         response = self.client.post(reverse('cart:add', args=[self.product.id]), {'quantity': 2, 'next': reverse('cart:detail')})
-        self.assertRedirects(response, reverse('cart:detail'))
+        self.assertEqual(response['Location'], reverse('cart:detail'))
         cart_page = self.client.get(reverse('cart:detail'))
         self.assertContains(cart_page, '240000đ')
+
+    def test_add_product_rejects_external_next_url(self):
+        response = self.client.post(reverse('cart:add', args=[self.product.id]), {
+            'quantity': 1,
+            'next': 'https://outside.example/path',
+        })
+
+        self.assertEqual(response['Location'], reverse('cart:detail'))
+
+    def test_add_product_handles_non_numeric_quantity_without_server_error(self):
+        response = self.client.post(
+            reverse('cart:add', args=[self.product.id]),
+            {'quantity': 'many'},
+            follow=True,
+        )
+
+        self.assertContains(response, 'Số lượng không hợp lệ')
+        self.assertNotContains(response, '240000đ')
+
+    def test_update_cart_handles_non_numeric_quantity_without_server_error(self):
+        self.client.post(reverse('cart:add', args=[self.product.id]), {'quantity': 2})
+
+        response = self.client.post(
+            reverse('cart:update', args=[self.product.id]),
+            {'quantity': 'many'},
+            follow=True,
+        )
+
+        self.assertContains(response, 'Số lượng không hợp lệ')
+        self.assertContains(response, '240000đ')
+
+    def test_add_quantity_is_capped_at_available_stock(self):
+        self.product.stock = 2
+        self.product.save(update_fields=['stock'])
+
+        self.client.post(reverse('cart:add', args=[self.product.id]), {'quantity': 5})
+        response = self.client.get(reverse('cart:detail'))
+
+        self.assertEqual(response.context['items'][0]['quantity'], 2)
+        self.assertContains(response, '240000đ')
+
+    def test_out_of_stock_product_cannot_be_added(self):
+        self.client.post(reverse('cart:add', args=[self.product.id]), {'quantity': 1})
+        self.product.stock = 0
+        self.product.save(update_fields=['stock'])
+
+        response = self.client.post(reverse('cart:add', args=[self.product.id]), {'quantity': 1}, follow=True)
+
+        self.assertContains(response, 'Sản phẩm đã hết hàng')
+        self.assertNotContains(response, 'Mộc × 1')
 
     def test_cart_page_queries_do_not_grow_when_product_categories_render(self):
         products = [self.product]

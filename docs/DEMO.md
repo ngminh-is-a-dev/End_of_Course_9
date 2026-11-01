@@ -24,17 +24,17 @@ Mở hai session trình duyệt: session khách và cửa sổ riêng tư cho Ad
 | 01:00–03:00 | Tìm sản phẩm, lọc catalogue, mở Laura Coffee Blend | “Catalogue cho phép tìm theo tên hoặc mô tả, lọc theo danh mục, giá và mức rang. Trang danh sách có phân trang HTML. Trang chi tiết trình bày giá, tồn kho, sản phẩm liên quan và đánh giá.” Thu nhỏ cửa sổ để minh họa responsive nếu thao tác nhanh. |
 | 03:00–04:00 | Mở hồ sơ khách; xem voucher/lịch sử đăng nhập và đơn | “Tài khoản mới được cấp voucher freeship riêng. Hồ sơ hiển thị tối đa 20 lần đăng nhập gần nhất và những đơn gắn với tài khoản này. Khách vãng lai vẫn đặt được hàng, nhưng đơn đó không tự gắn vào tài khoản sau này.” |
 | 04:00–05:00 | Gửi hoặc cập nhật review; sao chép liên kết sản phẩm | “Đánh giá hiển thị công khai. Người đăng nhập có thể chấm từ 1 đến 5 sao; mỗi người có một đánh giá cho mỗi sản phẩm và có thể sửa đánh giá của mình. Chia sẻ có Facebook, Zalo và sao chép URL; preview mạng xã hội cần URL công khai.” |
-| 05:00–08:00 | Thêm sản phẩm, đổi số lượng, áp voucher rồi checkout COD | “Giỏ hàng được lưu trong session. Phí giao tiêu chuẩn là 30.000 đồng và voucher hợp lệ đưa phí về 0. Checkout hiện hỗ trợ thanh toán khi nhận hàng. Sau khi đặt thành công, mã đơn xuất hiện ở trang xác nhận và giỏ được làm trống.” Dùng thông tin giả lập khi nhập form. |
+| 05:00–08:00 | Thêm sản phẩm, đổi số lượng, áp voucher rồi checkout COD | “Giỏ hàng được lưu trong session. Phí giao tiêu chuẩn là 30.000 đồng và voucher hợp lệ đưa phí về 0. Checkout kiểm tra tồn kho và hỗ trợ thanh toán khi nhận hàng. Sau khi đặt thành công, mã đơn xuất hiện ở trang xác nhận, giỏ được làm trống và tồn kho được cập nhật.” Dùng thông tin giả lập khi nhập form. |
 | 08:00–10:00 | Admin tìm đơn, cập nhật giao hàng; refresh hồ sơ khách | “Đơn mới bắt đầu ở trạng thái Đang đóng gói và Chờ thanh toán. Admin quản lý giao hàng và thu tiền ở hai trường riêng. Vì vậy, chuyển sang Đã giao không tự đánh dấu Đã thanh toán.” Lưu mỗi lần cập nhật; có thể dừng ở Đang giao nếu cần tiết kiệm thời gian. |
 | 10:00–11:00 | Mở API list có bộ lọc và API detail | “API công khai chỉ đọc, trả sản phẩm đang hoạt động. Danh sách hỗ trợ tìm kiếm, danh mục và mức rang; response là mảng JSON chưa phân trang. Endpoint detail trả một object theo slug.” |
 | 11:00–12:00 | Mở bảng đo truy vấn trong [báo cáo kỹ thuật](TECH_REPORT.md) | “Trong lần đo trên SQLite local, truy vấn trang giỏ giảm từ 3 xuống 2 với một sản phẩm và từ 5 xuống 2 với ba sản phẩm. Profile giảm từ 7 xuống 6. Đây là số query trong fixture test, không phải benchmark tải hay độ trễ production.” |
-| 12:00–13:00 | Nêu giới hạn và trả lời câu hỏi | “Các giới hạn hiện tại gồm API chưa phân trang, checkout chưa trừ tồn kho và chưa có thanh toán trực tuyến. Phần tiếp theo nên ưu tiên theo quy mô catalogue và yêu cầu vận hành thực tế.” Dành phút cuối cho câu hỏi. |
+| 12:00–13:00 | Nêu giới hạn và trả lời câu hỏi | “Các giới hạn hiện tại gồm API chưa phân trang, chưa có thanh toán trực tuyến và chưa kiểm thử tải/đồng thời trên production. Phần tiếp theo nên ưu tiên theo quy mô catalogue và yêu cầu vận hành thực tế.” Dành phút cuối cho câu hỏi. |
 
 ## Luồng demo chi tiết
 
 ### Checkout và Admin
 
-Đăng nhập trước khi checkout để đơn gắn vào tài khoản demo. Nhập tên, điện thoại và địa chỉ giả lập; có thể dùng email thuộc `example.com`. Chọn **Thanh toán khi nhận hàng**. Trang thành công chỉ xác nhận đã tạo đơn, không có nghĩa đơn đã giao.
+Đăng nhập trước khi checkout để đơn gắn vào tài khoản demo. Nhập tên, điện thoại và địa chỉ giả lập; có thể dùng email thuộc `example.com`. Chọn **Thanh toán khi nhận hàng**. Checkout kiểm tra tồn kho và trừ số lượng trong cùng transaction tạo đơn. Trang thành công chỉ xác nhận đã tạo đơn, không có nghĩa đơn đã giao.
 
 Trong Admin, tìm theo mã `BL…` vừa tạo. Cột `delivery_status` có thể sửa ở danh sách nhưng cần bấm lưu. Cập nhật `packing` sang `shipping`, rồi refresh hồ sơ khách để xem trạng thái mới. Chỉ đổi `payment_status` sang **Đã thanh toán** nếu đang minh họa tình huống đã thu COD; không tự suy ra trạng thái này từ việc giao hàng.
 

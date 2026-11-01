@@ -12,7 +12,7 @@
             <div class="cart-item-info"><p class="eyebrow">{{ item.product.category.name }}</p><h2><a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a></h2><strong>{{ item.product.price|stringformat:'d' }}đ</strong></div>
             <form class="qty-form" method="post" action="{% url 'cart:update' item.product.id %}">
               {% csrf_token %}
-              <input aria-label="Số lượng {{ item.product.name }}" type="number" name="quantity" min="0" value="{{ item.quantity }}">
+              <input aria-label="Số lượng {{ item.product.name }}" type="number" name="quantity" min="0" max="{{ item.product.stock }}" value="{{ item.quantity }}">
               <button type="submit">Cập nhật</button>
             </form>
             <strong class="cart-subtotal">{{ item.subtotal|stringformat:'d' }}đ</strong>

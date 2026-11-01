@@ -14,7 +14,10 @@ def get_filtered_products(params):
         products = products.filter(category__slug__in=categories)
     if roasts:
         products = products.filter(roast_level__in=roasts)
-    ranges = {'under-150': (0, 150000), '150-300': (150000, 300000), 'over-300': (300000, 99999999)}
-    if price in ranges:
-        products = products.filter(price__range=ranges[price])
+    if price == 'under-150':
+        products = products.filter(price__lt=150000)
+    elif price == '150-300':
+        products = products.filter(price__range=(150000, 300000))
+    elif price == 'over-300':
+        products = products.filter(price__gt=300000)
     return products
