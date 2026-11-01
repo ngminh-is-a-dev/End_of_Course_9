@@ -1,77 +1,63 @@
-# Bean & Leaf — Kịch bản thuyết trình 18 phút
+# Bean & Leaf — Kịch bản thuyết trình 13 phút
+
+Kịch bản có 12 phút trình bày và 1 phút hỏi đáp. Nếu cần kết thúc trong 10 phút, bỏ thao tác review/chia sẻ trực tiếp, rút phần catalogue còn 1 phút và nêu kết quả truy vấn bằng một câu; vẫn giữ luồng đặt hàng, Admin và API.
 
 ## Chuẩn bị trước buổi trình bày
 
-Cài môi trường theo [README](../README.md). Từ thư mục chứa `manage.py`, dùng `.venv` đã có dependencies:
+Làm theo [README](../README.md) để cài và khởi động ứng dụng. Với cấu hình local, đặt `DEBUG=1` trong `.env`; dùng SQLite mặc định. Chạy migration, seed dữ liệu và server trước khi bắt đầu:
 
 ```powershell
 .\.venv\Scripts\python.exe manage.py migrate
 .\.venv\Scripts\python.exe manage.py seed_catalog
-.\.venv\Scripts\python.exe manage.py createsuperuser
 .\.venv\Scripts\python.exe manage.py runserver
 ```
 
-Bỏ qua `createsuperuser` nếu đã có tài khoản quản trị; không có mật khẩu admin mặc định. Demo HTTP local dùng DEBUG=True theo file mẫu; không chiếu `.env` hoặc mật khẩu. Chạy server trước giờ và giữ terminal mở; dùng cửa sổ PowerShell khác nếu gọi API.
+Tạo trước tài khoản superuser và một tài khoản khách demo. Đăng nhập khách để kiểm tra voucher freeship, dọn giỏ hàng và chuẩn bị đăng nhập sẵn. Không chiếu `.env` hoặc mật khẩu. `seed_catalog` tạo/cập nhật 3 danh mục, 8 sản phẩm và đặt tồn kho sản phẩm mẫu về 25; chỉ chạy trên database demo. Widget Zalo là tùy chọn; localhost không tạo preview Facebook/Zalo.
 
-`seed_catalog` tạo/cập nhật 3 danh mục, 8 sản phẩm, tồn kho 25; không tạo user/review/đơn/ảnh. Seed lại ghi giá và tồn kho mẫu, chỉ dùng trên database demo. Kiểm tra `/products/laura-coffee-blend-xam/` còn hoạt động nếu đã sửa dữ liệu trước đó. Chuẩn bị ảnh PNG/JPEG nhỏ để upload avatar; có thể dùng avatar mặc định nếu bỏ qua thao tác tùy chọn này.
+Mở hai session trình duyệt: session khách và cửa sổ riêng tư cho Admin. Để sẵn các trang `/`, `/products/`, trang chi tiết Laura, `/accounts/profile/`, `/cart/`, API và `/admin/orders/order/`. Có thể tạo một đơn COD dự phòng trước buổi, không dùng voucher; ghi mã đơn và xác nhận đơn thuộc tài khoản demo. Nếu không tạo đơn dự phòng, lưu sẵn response API và ảnh chụp các màn hình cần thiết.
 
-Dùng hai cửa sổ có session riêng: cửa sổ thường cho khách, cửa sổ riêng tư cho superuser. Đăng nhập Admin trước, để sẵn `/admin/orders/order/`; không dùng chung session với khách. Tạo tài khoản khách demo mới tại `/accounts/signup/` trước buổi, ghi username và mã voucher thực hiển thị trong giỏ. Dùng đúng tài khoản này xuyên suốt phần live và đơn dự phòng. Phần số phụ thuộc ID user, không giả định luôn là `FREESHIP-00001`.
+## Lịch trình 13 phút
 
-Khi vẫn đăng nhập đúng tài khoản khách sẽ dùng live, tạo một đơn COD dự phòng **không áp voucher**; nếu giỏ đang có mã thì gỡ mã trước checkout. Ghi mã `BL…`, mở profile của chính tài khoản đó để xác nhận đơn xuất hiện, kiểm tra voucher vẫn chưa dùng và đặt đơn dự phòng ở **Đang đóng gói** trong Admin. Sau đó đăng xuất bằng nút navbar để sẵn màn hình login. Có thể lưu màn hình profile/đơn và JSON từ lần tập dượt; khi dùng dự phòng phải nói rõ đây là kết quả chuẩn bị trước.
+| Thời gian | Thao tác | Lời dẫn gợi ý |
+| --- | --- | --- |
+| 00:00–01:00 | Giới thiệu tại trang chủ | “Bean & Leaf là cửa hàng cà phê trực tuyến. Website dùng Django để phục vụ giao diện và Django REST Framework cho API catalogue. Khách có thể đặt hàng COD; quản trị viên xử lý đơn trong Admin.” |
+| 01:00–03:00 | Tìm sản phẩm, lọc catalogue, mở Laura Coffee Blend | “Catalogue cho phép tìm theo tên hoặc mô tả, lọc theo danh mục, giá và mức rang. Trang danh sách có phân trang HTML. Trang chi tiết trình bày giá, tồn kho, sản phẩm liên quan và đánh giá.” Thu nhỏ cửa sổ để minh họa responsive nếu thao tác nhanh. |
+| 03:00–04:00 | Mở hồ sơ khách; xem voucher/lịch sử đăng nhập và đơn | “Tài khoản mới được cấp voucher freeship riêng. Hồ sơ hiển thị tối đa 20 lần đăng nhập gần nhất và những đơn gắn với tài khoản này. Khách vãng lai vẫn đặt được hàng, nhưng đơn đó không tự gắn vào tài khoản sau này.” |
+| 04:00–05:00 | Gửi hoặc cập nhật review; sao chép liên kết sản phẩm | “Đánh giá hiển thị công khai. Người đăng nhập có thể chấm từ 1 đến 5 sao; mỗi người có một đánh giá cho mỗi sản phẩm và có thể sửa đánh giá của mình. Chia sẻ có Facebook, Zalo và sao chép URL; preview mạng xã hội cần URL công khai.” |
+| 05:00–08:00 | Thêm sản phẩm, đổi số lượng, áp voucher rồi checkout COD | “Giỏ hàng được lưu trong session. Phí giao tiêu chuẩn là 30.000 đồng và voucher hợp lệ đưa phí về 0. Checkout hiện hỗ trợ thanh toán khi nhận hàng. Sau khi đặt thành công, mã đơn xuất hiện ở trang xác nhận và giỏ được làm trống.” Dùng thông tin giả lập khi nhập form. |
+| 08:00–10:00 | Admin tìm đơn, cập nhật giao hàng; refresh hồ sơ khách | “Đơn mới bắt đầu ở trạng thái Đang đóng gói và Chờ thanh toán. Admin quản lý giao hàng và thu tiền ở hai trường riêng. Vì vậy, chuyển sang Đã giao không tự đánh dấu Đã thanh toán.” Lưu mỗi lần cập nhật; có thể dừng ở Đang giao nếu cần tiết kiệm thời gian. |
+| 10:00–11:00 | Mở API list có bộ lọc và API detail | “API công khai chỉ đọc, trả sản phẩm đang hoạt động. Danh sách hỗ trợ tìm kiếm, danh mục và mức rang; response là mảng JSON chưa phân trang. Endpoint detail trả một object theo slug.” |
+| 11:00–12:00 | Mở bảng đo truy vấn trong [báo cáo kỹ thuật](TECH_REPORT.md) | “Trong lần đo trên SQLite local, truy vấn trang giỏ giảm từ 3 xuống 2 với một sản phẩm và từ 5 xuống 2 với ba sản phẩm. Profile giảm từ 7 xuống 6. Đây là số query trong fixture test, không phải benchmark tải hay độ trễ production.” |
+| 12:00–13:00 | Nêu giới hạn và trả lời câu hỏi | “Các giới hạn hiện tại gồm API chưa phân trang, checkout chưa trừ tồn kho và chưa có thanh toán trực tuyến. Phần tiếp theo nên ưu tiên theo quy mô catalogue và yêu cầu vận hành thực tế.” Dành phút cuối cho câu hỏi. |
 
-Mở sẵn các tab `/`, `/products/`, `/accounts/login/`, `/accounts/profile/`, `/cart/`, API và Admin. Localhost không tạo preview trên Facebook/Zalo. Widget Zalo chỉ là tùy chọn khi có `ZALO_OA_ID`; sao chép liên kết đủ để demo. Không cần đăng bài lên mạng xã hội.
+## Luồng demo chi tiết
 
-## Lịch trình: 18 phút
+### Checkout và Admin
 
-Tổng **1 + 2 + 2 + 2 + 3 + 2 + 2 + 2 + 2 = 18 phút**, nằm trong yêu cầu 15–20 phút. Tập theo đồng hồ, hết mốc chuyển bước; hỏi đáp ở 2 phút cuối.
+Đăng nhập trước khi checkout để đơn gắn vào tài khoản demo. Nhập tên, điện thoại và địa chỉ giả lập; có thể dùng email thuộc `example.com`. Chọn **Thanh toán khi nhận hàng**. Trang thành công chỉ xác nhận đã tạo đơn, không có nghĩa đơn đã giao.
 
-| Mốc | Thời lượng | Thao tác | Điểm cần nói |
-| --- | ---: | --- | --- |
-| 00:00–01:00 | 1 phút | Giới thiệu tại `/` | Bán cà phê; Django MVT + DRF + SQLite; khách đặt COD, Admin quản lý giao hàng |
-| 01:00–03:00 | 2 phút | Trang chủ → `/products/`, tìm Laura, lọc danh mục/mức rang; thu hẹp cửa sổ, mở chi tiết | Responsive; HTML phân trang 9 nhưng seed có 8 nên không cần có trang 2 |
-| 03:00–05:00 | 2 phút | Login khách tại `/accounts/login/`; profile: tên/avatar/IP/thời gian; upload ảnh nếu đã chuẩn bị | Cần đăng nhập; 20 lần đăng nhập gần nhất; IP local thường loopback; chỉ đơn gắn với tài khoản |
-| 05:00–07:00 | 2 phút | `/products/laura-coffee-blend-xam/`: gửi 5 sao/nhận xét rồi sửa 4 sao; sao chép liên kết; chỉ Facebook/Zalo và `og:` trong source | Một review mỗi người/sản phẩm, gửi lại là sửa; không cần đã mua; preview cần URL công khai |
-| 07:00–10:00 | 3 phút | Thêm hàng, `/cart/`, đổi số lượng, áp voucher chưa dùng; `/checkout/`, nhập thông tin giả lập, đặt COD | Phí 30.000đ → 0đ khi voucher hợp lệ; ghi mã đơn trên trang thành công; giỏ trống |
-| 10:00–12:00 | 2 phút | Admin tìm mã tại `/admin/orders/order/`; đổi packing → shipping → delivered, lưu từng lần; refresh profile khách | Đang đóng gói → Đang giao → Đã giao; giao hàng và thanh toán là hai trường độc lập |
-| 12:00–14:00 | 2 phút | API list có filter, rồi detail; chỉ mảng/object và category/price | GET công khai, search/category/roast; raw list chưa phân trang; chỉ sản phẩm hoạt động |
-| 14:00–16:00 | 2 phút | Mở bảng query/bảo mật trong [báo cáo](TECH_REPORT.md), chỉ kết quả QA chuẩn bị trước | Giỏ 3/5 → 2/2 query, profile 7/7 → 6/6; CSRF/escaping có test; settings chưa chứng minh server có TLS |
-| 16:00–18:00 | 2 phút | Tổng kết và hỏi đáp | Giới hạn: chưa test tải, API raw list, checkout chưa trừ tồn kho/khóa đồng thời; mở rộng cần thiết kế và đo tiếp |
+Trong Admin, tìm theo mã `BL…` vừa tạo. Cột `delivery_status` có thể sửa ở danh sách nhưng cần bấm lưu. Cập nhật `packing` sang `shipping`, rồi refresh hồ sơ khách để xem trạng thái mới. Chỉ đổi `payment_status` sang **Đã thanh toán** nếu đang minh họa tình huống đã thu COD; không tự suy ra trạng thái này từ việc giao hàng.
 
-## Thao tác cần tập kỹ
+### API
 
-**Checkout (07:00–10:00):** dùng tên/điện thoại/địa chỉ giả lập, email thuộc `example.com`; chọn **Thanh toán khi nhận hàng**. `/checkout/success/<mã-đơn>/` xác nhận đơn đã ghi nhận và **Đang đóng gói**, không nói đã giao ngay khi đặt. Login trước checkout để đơn vào profile; đơn khách vãng lai không tự gắn lại về sau.
-
-**Admin (10:00–12:00):** cần superuser. Cột `delivery_status` sửa ngay tại danh sách nhưng phải bấm lưu. Sau mỗi lần lưu, refresh profile khách để chỉ nhãn mới. `payment_status` ở trang sửa đơn chỉ đổi **Đã thanh toán** khi minh họa đã thu COD; đây là thao tác thủ công, không tự đổi khi giao. Admin chưa ép trình tự trạng thái.
-
-**API (12:00–14:00):** mở URL trong trình duyệt hoặc chạy ở PowerShell khi server đang hoạt động:
+Khi server đang chạy, có thể gọi hai endpoint trong PowerShell:
 
 ```powershell
 Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/products/?search=Laura&category=ca-phe-hat&roast=dark' -Headers @{ Accept = 'application/json' } | ConvertTo-Json -Depth 5
 Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/products/laura-coffee-blend-xam/' -Headers @{ Accept = 'application/json' } | ConvertTo-Json -Depth 5
 ```
 
-Pipeline PowerShell có thể trình bày mảng một phần tử như object; chỉ response trình duyệt hoặc README để giải thích list là mảng, detail là object. Không giới thiệu `page=2` là phân trang API hoặc nói API trả ảnh/review.
+PowerShell đôi khi trình bày mảng một phần tử như object trong pipeline; response API danh sách vẫn là mảng. Không giới thiệu `page` là phân trang API hoặc nói API trả ảnh/review.
 
-## Dự phòng trong cùng thời lượng
+## Phương án dự phòng
 
-| Tình huống | Thay thế tại đúng mốc |
+| Nếu gặp tình huống | Cách xử lý |
 | --- | --- |
-| Avatar upload chậm/không có ảnh | Chỉ avatar mặc định/form rồi chuyển lịch sử/đơn |
-| Facebook/Zalo không mở, thiếu OA ID, clipboard bị chặn | Chỉ URL sản phẩm và `og:` trong page source; giải thích OA/URL công khai, không chờ dịch vụ ngoài |
-| Voucher đã dùng | Giữ nguyên tài khoản khách đang live, minh họa phí thường 30.000đ; không chuyển tài khoản hoặc sửa voucher của người thật |
-| Checkout live lỗi | Dùng mã đơn dự phòng đã xác nhận thuộc đúng tài khoản khách đang live để demo Admin → profile; nói rõ đơn dự phòng và ghi lại lỗi |
-| API/server lỗi | Dùng JSON/màn hình lưu từ tập dượt, nói rõ live bị gián đoạn; không cài lại dependencies giữa bài |
+| Voucher đã dùng | Giữ nguyên tài khoản; tiếp tục demo giỏ với phí giao 30.000đ. |
+| Checkout lỗi | Dùng đơn dự phòng đã xác nhận thuộc đúng tài khoản; nói rõ đây là đơn chuẩn bị trước. |
+| Avatar tải chậm hoặc chia sẻ mạng xã hội không mở | Bỏ thao tác đó, chuyển thẳng sang nội dung kế tiếp. |
+| API hoặc server gián đoạn | Dùng response JSON/ảnh chụp đã lưu và nói rõ phần đó không chạy trực tiếp. |
 
-## QA, tập dượt và đặt lại dữ liệu
+## Kết thúc và dọn dữ liệu demo
 
-Chạy trước buổi, không chờ full suite trong 18 phút:
-
-```powershell
-.\.venv\Scripts\python.exe manage.py check
-.\.venv\Scripts\python.exe manage.py test
-.\.venv\Scripts\python.exe manage.py check --deploy
-```
-
-Tuần 6 đã ghi nhận 40 test đạt. Local `check --deploy` có 5 cảnh báo HTTP/DEBUG dự kiến; không bật redirect HTTPS trên server HTTP chỉ để che cảnh báo. Ranh giới production được giải thích trong [báo cáo](TECH_REPORT.md#6-bảo-mật-và-ranh-giới-triển-khai).
-
-Sau mỗi lần tập: ghi mã đơn; xóa/cập nhật sản phẩm bằng giao diện giỏ để chuẩn bị lại. Seed không làm mới voucher đã dùng. Muốn dùng voucher từ đầu ở lần trình bày tiếp theo, chuẩn bị user demo mới trước buổi và lặp lại toàn bộ bước tạo đơn dự phòng không áp voucher cho chính user mới, xác nhận đơn trong profile và ghi lại cặp username/mã đơn mới. Không dùng đơn dự phòng của tài khoản cũ cho user mới. Trong một lần live giữ nguyên tài khoản; nếu voucher hết thì dùng nhánh phí thường ở trên. Review gửi lại sửa review cũ, có thể giữ để demo tính sửa. Admin có thể đặt đúng đơn demo về **Đang đóng gói** trước lần tập sau. Nếu cần xóa dữ liệu thử, chỉ xóa đúng review/đơn demo đã nhận diện qua Admin trên database demo; không xóa database hay dữ liệu khách thật. Kết thúc bằng đăng xuất hai session, `Ctrl+C` terminal server.
+Sau buổi trình bày, đăng xuất hai session và dừng server bằng `Ctrl+C`. Seed không khôi phục voucher đã dùng. Khi tập lại, dùng user demo mới nếu cần voucher chưa sử dụng; chỉ chỉnh hoặc xóa đơn/review demo đã nhận diện trong database demo.
